@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crazy Pop - Menú de Paletas</title>
+    <style>
+        /* --- ESTILOS GLOBALES --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', Courier, monospace, sans-serif;
+        }
+
+        body {
+            background-color: #050508; 
+            background-image: 
+                linear-gradient(rgba(5, 5, 8, 0.9) 0%, rgba(5, 5, 8, 0.9) 100%),
+                linear-gradient(90deg, rgba(255, 0, 127, 0.05) 1px, transparent 1px),
+                linear-gradient(rgba(255, 0, 127, 0.05) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* --- MENÚ DE NAVEGACIÓN SUPERIOR --- */
+        header {
+            background-color: #000000;
+            padding: 15px 20px;
+            border-bottom: 4px solid #39ff14;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(57, 255, 20, 0.25);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo-text {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #ff007f;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 8px #ff007f;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #39ff14;
+            font-weight: bold;
+            padding: 8px 16px;
+            border: 2px solid transparent;
+            transition: all 0.2s ease-in-out;
+            text-transform: uppercase;
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            border-color: #39ff14;
+            background-color: rgba(57, 255, 20, 0.1);
+            color: #39ff14;
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
+        }
+
+        /* --- CONTENIDO PRINCIPAL --- */
+        main {
+            flex: 1;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .menu-title {
+            font-size: 2.8rem;
+            color: #39ff14;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .menu-subtitle {
+            font-size: 1.1rem;
+            color: #ff007f;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 40px;
+            font-weight: bold;
+        }
+
+        /* --- REJILLA DEL CATÁLOGO --- */
+        .grid-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            justify-content: center;
+        }
+
+        /* --- TARJETAS DE PALETAS (STICKER / ARCADE STYLE) --- */
+        .pop-card {
+            background-color: #000000;
+            border: 3px solid #ff007f;
+            border-radius: 12px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            box-shadow: 0 8px 0px rgba(255, 0, 127, 0.2);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+        }
+
+        /* Efecto hover interactivo */
+        .pop-card:hover {
+            transform: translateY(-8px);
+            border-color: #39ff14;
+            box-shadow: 0 12px 20px rgba(57, 255, 20, 0.3);
+        }
+
+        /* Contenedor de la Imagen (Grande y Destacada) */
+        .image-container {
+            width: 100%;
+            height: 260px;
+            background-color: #121218;
+            border: 2px dashed #ff007f;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+            transition: border-color 0.3s ease;
+        }
+
+        .pop-card:hover .image-container {
+            border-color: #39ff14;
+        }
+
+        .image-container img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            /* Suaviza los pixeles si usas pixel art o renders limpios */
+            image-rendering: auto; 
+        }
+
+        /* --- DETALLES DE TEXTO CON COLORES DE LA MARCA --- */
+        .pop-name {
+            font-size: 1.6rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        /* Colores personalizados por tarjeta para jugar con la paleta pastel/neón */
+        .color-mint { color: #bffdcb; text-shadow: 0 0 5px rgba(191, 253, 203, 0.5); }
+        .color-pink { color: #ffb7d5; text-shadow: 0 0 5px rgba(255, 183, 213, 0.5); }
+        .color-cream { color: #fffdd0; text-shadow: 0 0 5px rgba(255, 253, 208, 0.5); }
+        .color-matcha { color: #d0f0c0; text-shadow: 0 0 5px rgba(208, 240, 192, 0.5); }
+        .color-neon { color: #39ff14; text-shadow: 0 0 5px rgba(57, 255, 20, 0.5); }
+
+        .pop-description {
+            font-size: 0.95rem;
+            color: #cccccc;
+            line-height: 1.4;
+            margin-bottom: 15px;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .pop-tag {
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 5px 12px;
+            border-radius: 20px;
+            background-color: rgba(255, 0, 127, 0.15);
+            border: 1px solid #ff007f;
+            color: #ff007f;
+        }
+
+        .pop-card:hover .pop-tag {
+            background-color: rgba(57, 255, 20, 0.15);
+            border-color: #39ff14;
+            color: #39ff14;
+        }
+
+        footer { 
+            background-color: #000000; 
+            text-align: center; 
+            padding: 15px; 
+            font-size: 0.9rem; 
+            color: #444444; 
+            border-top: 4px solid #ff007f; 
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <nav>
+            <div class="logo-text">Crazy Pop</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Lobby</a></li>
+                <li><a href="1.html" class="active">Sección 1</a></li>
+                <li><a href="2.html">Sección 2</a></li>
+                <li><a href="3.html">Sección 3</a></li>
+                <li><a href="4.html">Sección 4</a></li>
+                <li><a href="5.html">Sección 5</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1 class="menu-title">Menú de Sabores</h1>
+        <p class="menu-subtitle">Sintoniza tu poder con nuestros sabores Arcade</p>
+
+        <div class="grid-menu">
+            
+            <div class="pop-card">
+                <div class="image-container">
+                    <img src="p1.png" alt="Paleta 1">
+                </div>
+                <h2 class="pop-name color-mint">Mint Flash</h2>
+                <p class="pop-description">Una oleada refrescante de menta helada con chispas de chocolate retro. Ideal para mantener la mente fría en niveles difíciles.</p>
+                <span class="pop-tag">Refrescante</span>
+            </div>
+
+            <div class="pop-card">
+                <div class="image-container">
+                    <img src="p2.png" alt="Paleta 2">
+                </div>
+                <h2 class="pop-name color-pink">Bubble Wave</h2>
+                <p class="pop-description">El clásico e inconfundible sabor a chicle de los 90s con un sutil color rosa pastel. ¡Activa tu modo súper saltarín!</p>
+                <span class="pop-tag">Dulce Neón</span>
+            </div>
+
+            <div class="pop-card">
+                <div class="image-container">
+                    <img src="p3.png" alt="Paleta 3">
+                </div>
+                <h2 class="pop-name color-cream">Cream Dream</h2>
+                <p class="pop-description">Suave y cremosa base de vainilla artesanal texturizada con dulce de leche suave. Un sabor reconfortante y nostálgico.</p>
+                <span class="pop-tag">Cremosa</span>
+            </div>
+
+            <div class="pop-card">
+                <div class="image-container">
+                    <img src="p4.png" alt="Paleta 4">
+                </div>
+                <h2 class="pop-name color-matcha">Matcha Glow</h2>
+                <p class="pop-description">Té matcha finamente seleccionado combinado con un toque de crema ligera. Sabor equilibrado, místico y relajante.</p>
+                <span class="pop-tag">Zen Edition</span>
+            </div>
+
+            <div class="pop-card">
+                <div class="image-container">
+                    <img src="p5.png" alt="Paleta 5">
+                </div>
+                <h2 class="pop-name color-neon">Cyber Sour</h2>
+                <p class="pop-description">Una explosión ácida de manzana verde y limón que hará parpadear tus sentidos. ¡La favorita de los jugadores expertos!</p>
+                <span class="pop-tag">Ácido Eléctrico</span>
+            </div>
+
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Crazy Pop Arcade - Todos los derechos reservados.</p>
+    </footer>
+
+</body>
+</html>
