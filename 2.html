@@ -529,32 +529,34 @@
             }
 
             // Registro de colisión con los coleccionables
-            if (pacman.x % tileSize === 0 && pacman.y % tileSize === 0) {
-                const col = pacman.x / tileSize;
-                const row = pacman.y / tileSize;
-                if (map[row] && map[row][col] === 0) {
-                    let consumedType = itemTypeMap[row][col];
-                    map[row][col] = 2; 
-                    score += 10;
-                    totalItems--;
-                    scoreElement.innerText = score.toString().padStart(4, '0');
+if (pacman.x % tileSize === 0 && pacman.y % tileSize === 0) {
+    const col = pacman.x / tileSize;
+    const row = pacman.y / tileSize;
+    if (map[row] && map[row][col] === 0) {
+        let consumedType = itemTypeMap[row][col];
+        map[row][col] = 2; 
+        score += 10;
+        totalItems--;
+        scoreElement.innerText = score.toString().padStart(4, '0');
 
-                    // ACUMULACIÓN: Suma el nuevo estado sin borrar el anterior
-                    if (consumedType === 'p1') {
-                        pacman.speedMode = true;
-                        pacman.speedTimer = 360; // 6 segundos de velocidad
-                    }
-                    if (consumedType === 'p2') {
-                        pacman.superMode = true;
-                        pacman.superTimer = 480; // 8 segundos de fuerza
-                    }
+        // MECÁNICA PALETA 1: Si ya estaba activa, restablece el tiempo a 6 segundos (No se acumula de forma infinita)
+        if (consumedType === 'p1') {
+            pacman.speedMode = true;
+            pacman.speedTimer = 360; 
+        }
+        
+        // MECÁNICA PALETA 2: Si ya tenías el poder, se restablece a 8 segundos máximos (Evita romper el juego)
+        if (consumedType === 'p2') {
+            pacman.superMode = true;
+            pacman.superTimer = 480; 
+        }
 
-                    if (totalItems <= 0) {
-                        isGameOver = true;
-                        victoryScreen.style.display = 'flex';
-                    }
-                }
-            }
+        if (totalItems <= 0) {
+            isGameOver = true;
+            victoryScreen.style.display = 'flex';
+        }
+    }
+}
 
             // SISTEMA INTELIGENTE DE FANTASMAS (INTELLIGENT ANTI-STUCK IA)
             ghosts.forEach(g => {
