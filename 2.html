@@ -127,7 +127,7 @@
             box-shadow: 0 0 20px rgba(255, 0, 127, 0.2);
         }
 
-        /* --- INTERFACES RETRO (VICTORIA Y DERROTA) --- */
+        /* --- INTERFACES OVERLAYS --- */
         .game-overlay {
             display: none; 
             position: absolute;
@@ -171,7 +171,6 @@
             margin-bottom: 25px;
         }
 
-        /* Botón Arcade reactivo */
         .btn-retry {
             padding: 12px 30px;
             background-color: transparent;
@@ -204,6 +203,7 @@
         }
 
         .controls-info span { color: #ff007f; }
+        .controls-info em { color: #39ff14; font-style: normal;}
         footer { background-color: #000000; text-align: center; padding: 15px; font-size: 0.9rem; color: #444444; border-top: 4px solid #ff007f; }
     </style>
 </head>
@@ -248,7 +248,7 @@
             </div>
             
             <div class="controls-info">
-                ¡Las paletas raras te dan <span>SÚPER PODER VERDE</span> para comer fantasmas!
+                Paleta 1: <span>VELOCIDAD ROSA</span> | Paleta 2: <em>SÚPER PODER VERDE</em>
             </div>
         </div>
     </main>
@@ -277,18 +277,26 @@
         const imgPale = new Image(); imgPale.src = 'pale.png';
         const imgPale2 = new Image(); imgPale2.src = 'pale2.png';
 
-        // Estructura de la Ranita
+        // Estructura de la Ranita con velocidad inicial base
         const pacman = {
-            x: 30, y: 30, speed: 3,
+            x: 30, y: 30, 
+            baseSpeed: 3,
+            currentSpeed: 3,
             dx: 0, dy: 0,
             requestedDx: 0, requestedDy: 0,
             animationTimer: 0, useOpenSprite: true,
             direction: 'right',
+            
+            // Mecánica Paleta 2 (Fuerza)
             superMode: false,
-            superTimer: 0
+            superTimer: 0,
+            
+            // Mecánica Paleta 1 (Velocidad)
+            speedMode: false,
+            speedTimer: 0
         };
 
-        // Escuadrón de fantasmas con posiciones de reinicio (Spawn de vuelta)
+        // Escuadrón de fantasmas
         const ghosts = [
             { x: 300, y: 300, startX: 300, startY: 300, dx: 3, dy: 0, speed: 3, isDead: false, respawnTimer: 0 },
             { x: 330, y: 300, startX: 330, startY: 300, dx: -3, dy: 0, speed: 3, isDead: false, respawnTimer: 0 },
@@ -339,7 +347,9 @@
             pacman.x = 30; pacman.y = 30;
             pacman.dx = 0; pacman.dy = 0;
             pacman.requestedDx = 0; pacman.requestedDy = 0;
+            pacman.currentSpeed = pacman.baseSpeed;
             pacman.superMode = false; pacman.superTimer = 0;
+            pacman.speedMode = false; pacman.speedTimer = 0;
 
             map = JSON.parse(JSON.stringify(baseMap));
             itemTypeMap = [];
@@ -350,13 +360,12 @@
                     if (map[r][c] === 0) {
                         totalItems++; 
                         let rand = Math.random();
-                        // Reducimos las probabilidades notablemente para no saturar el mapa
                         if (rand < 0.08) { 
-                            itemTypeMap[r][c] = 'p1'; // 8% pale.png
+                            itemTypeMap[r][c] = 'p1'; // 8% de paleta normal (Velocidad)
                         } else if (rand < 0.14) { 
-                            itemTypeMap[r][c] = 'p2'; // 6% pale2.png (Poder Especial)
+                            itemTypeMap[r][c] = 'p2'; // 6% de paleta rara (Fuerza)
                         } else {
-                            itemTypeMap[r][c] = 'c';  // El resto son puntos limpios sin sprite
+                            itemTypeMap[r][c] = 'c';  
                         }
                     }
                 }
@@ -404,10 +413,13 @@
             if (pacman.direction === 'up') ctx.rotate(-Math.PI / 2);
             if (pacman.direction === 'down') ctx.rotate(Math.PI / 2);
 
-            // EFECTO DE BRILLO VERDE FOSFORESCENTE (Si está en súper modo)
+            // CONTROL DE BRILLOS FOSFORESCENTES SEPARADOS
             if (pacman.superMode) {
                 ctx.shadowBlur = 18;
-                ctx.shadowColor = "#39ff14";
+                ctx.shadowColor = "#39ff14"; // Brillo Verde Fosfo para Fuerza
+            } else if (pacman.speedMode) {
+                ctx.shadowBlur = 18;
+                ctx.shadowColor = "#ff007f"; // Brillo Rosa Fosfo para Velocidad
             }
 
             let currentImg = pacman.useOpenSprite ? imgOpen : imgClose;
@@ -418,24 +430,24 @@
                 ctx.beginPath();
                 ctx.arc(0, 0, tileSize/2.5, 0.2 * Math.PI, 1.8 * Math.PI);
                 ctx.lineTo(0, 0);
-                ctx.fillStyle = pacman.superMode ? "#39ff14" : "#ff007f";
+                ctx.fillStyle = pacman.superMode ? "#39ff14" : (pacman.speedMode ? "#ff007f" : "#f3f311");
                 ctx.fill();
                 ctx.closePath();
             }
             ctx.restore();
-            ctx.shadowBlur = 0; // Resetear sombra
+            ctx.shadowBlur = 0; 
         }
 
         function drawGhosts() {
             ghosts.forEach(g => {
-                if (g.isDead) return; // No dibujar si está en cola de reaparición
+                if (g.isDead) return;
 
                 ctx.beginPath();
                 ctx.arc(g.x + tileSize/2, g.y + tileSize/2, tileSize/2.5, Math.PI, 0, false);
                 ctx.lineTo(g.x + tileSize/2 + tileSize/2.5, g.y + tileSize/2 + tileSize/2.5);
                 ctx.lineTo(g.x + tileSize/2 - tileSize/2.5, g.y + tileSize/2 + tileSize/2.5);
                 
-                // Si la rana tiene poder, los fantasmas se vuelven rosa opaco/vulnerables
+                // Si la rana está en súper modo (verde), los fantasmas se asustan (rosa)
                 ctx.fillStyle = pacman.superMode ? "#ff007f" : "#39ff14"; 
                 ctx.fill();
                 ctx.shadowBlur = 8;
@@ -458,7 +470,7 @@
         function update() {
             if (isGameOver) return;
 
-            // Manejo del temporizador del Súper Poder de la rana
+            // Manejo del temporizador de la Paleta 2 (Fuerza / Súper)
             if (pacman.superMode) {
                 pacman.superTimer--;
                 if (pacman.superTimer <= 0) {
@@ -466,7 +478,16 @@
                 }
             }
 
-            // Movimiento de la ranita
+            // Manejo del temporizador de la Paleta 1 (Velocidad Rosa)
+            if (pacman.speedMode) {
+                pacman.speedTimer--;
+                if (pacman.speedTimer <= 0) {
+                    pacman.speedMode = false;
+                    pacman.currentSpeed = pacman.baseSpeed; // Vuelve a velocidad 3
+                }
+            }
+
+            // Movimiento preciso en rejilla adaptable (Soporta velocidad 3 y 5 perfectamente)
             if (pacman.x % tileSize === 0 && pacman.y % tileSize === 0) {
                 if (!isColliding(pacman.x + pacman.requestedDx * tileSize, pacman.y + pacman.requestedDy * tileSize)) {
                     pacman.dx = pacman.requestedDx;
@@ -481,11 +502,12 @@
                 }
             }
 
-            pacman.x += pacman.dx * pacman.speed;
-            pacman.y += pacman.dy * pacman.speed;
+            pacman.x += pacman.dx * pacman.currentSpeed;
+            pacman.y += pacman.dy * pacman.currentSpeed;
 
+            // Velocidad de animación de la boca según lo rápido que camina
             if (pacman.dx !== 0 || pacman.dy !== 0) {
-                pacman.animationTimer++;
+                pacman.animationTimer += pacman.speedMode ? 2 : 1;
                 if (pacman.animationTimer > 8) {
                     pacman.useOpenSprite = !pacman.useOpenSprite;
                     pacman.animationTimer = 0;
@@ -503,10 +525,24 @@
                     totalItems--;
                     scoreElement.innerText = score.toString().padStart(4, '0');
 
-                    // ACTIVAR MODO SUPER al comer pale2.png
+                    // MECÁNICA PALETA 1: ¡VELOCIDAD EXTRA Y BRILLO ROSA!
+                    if (consumedType === 'p1') {
+                        pacman.speedMode = true;
+                        pacman.currentSpeed = 5; // Sube velocidad (30 es divisible por 5)
+                        pacman.speedTimer = 300; // 5 segundos a 60fps
+                        
+                        // Cortar súper modo para evitar cruce de poderes conflictivos
+                        pacman.superMode = false; 
+                    }
+
+                    // MECÁNICA PALETA 2: FUERZA Y BRILLO VERDE
                     if (consumedType === 'p2') {
                         pacman.superMode = true;
-                        pacman.superTimer = 420; // 7 segundos aproximados a 60fps
+                        pacman.superTimer = 420; // 7 segundos
+                        
+                        // Quitar velocidad para balancear el estado de ataque
+                        pacman.speedMode = false;
+                        pacman.currentSpeed = pacman.baseSpeed;
                     }
 
                     if (totalItems <= 0) {
@@ -516,13 +552,13 @@
                 }
             }
 
-            // Lógica y Reaparición de Fantasmas
+            // IA y movimiento de Fantasmas
             ghosts.forEach(g => {
                 if (g.isDead) {
                     g.respawnTimer--;
                     if (g.respawnTimer <= 0) {
                         g.isDead = false;
-                        g.x = g.startX; g.y = g.startY; // Regresa al centro
+                        g.x = g.startX; g.y = g.startY; 
                     }
                     return; 
                 }
@@ -543,27 +579,29 @@
                 g.x += g.dx * g.speed;
                 g.y += g.dy * g.speed;
 
-                // Sistema de Colisiones Dinámico
+                // Cálculos de contacto físico
                 const dist = Math.hypot((pacman.x + tileSize/2) - (g.x + tileSize/2), (pacman.y + tileSize/2) - (g.y + tileSize/2));
                 if (dist < tileSize * 0.65) {
                     if (pacman.superMode) {
-                        // LA RANA SE COME AL FANTASMA
+                        // Cazando al fantasma
                         g.isDead = true;
-                        g.respawnTimer = 240; // 4 segundos en revivir
-                        score += 100; // Bonus por cazar enemigos
+                        g.respawnTimer = 240; 
+                        score += 100;
                         scoreElement.innerText = score.toString().padStart(4, '0');
                     } else {
-                        // EL FANTASMA MATA A LA RANA
+                        // El fantasma golpea a la rana (Incluso si va rápido con brillo rosa)
                         lives--;
                         livesContainer.innerText = "💖".repeat(lives);
                         if (lives <= 0) {
                             isGameOver = true;
                             gameOverScreen.style.display = 'flex';
                         } else {
-                            // Reinicio de posiciones tras perder una vida
                             pacman.x = 30; pacman.y = 30;
                             pacman.dx = 0; pacman.dy = 0;
                             pacman.requestedDx = 0; pacman.requestedDy = 0;
+                            pacman.currentSpeed = pacman.baseSpeed;
+                            pacman.speedMode = false;
+                            pacman.superMode = false;
                         }
                     }
                 }
@@ -597,7 +635,6 @@
             }
         });
 
-        // Inicio automático del sistema
         initGameData();
         gameLoop();
     </script>
