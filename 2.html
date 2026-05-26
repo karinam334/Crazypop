@@ -79,7 +79,7 @@
             box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
         }
 
-        /* --- RETRO CABINET MAX --- */
+        /* --- RETRO CABINET --- */
         main {
             flex: 1;
             display: flex;
@@ -97,8 +97,9 @@
             border-radius: 4px;
             box-shadow: 0 0 45px rgba(255, 0, 127, 0.35);
             text-align: center;
-            max-width: 660px; /* Tamaño ideal para la nueva escala visual */
+            max-width: 710px; /* Ancho ideal para la nueva escala de 22x22 */
             width: 100%;
+            position: relative;
         }
 
         .score-board {
@@ -112,12 +113,64 @@
             text-transform: uppercase;
         }
 
+        /* Contenedor del canvas para poder encimar la pantalla de victoria */
+        .canvas-wrapper {
+            position: relative;
+            margin: 0 auto;
+            width: 660px;
+            height: 660px;
+        }
+
         canvas {
             background-color: #000000;
             border: 4px solid #ff007f;
             display: block;
-            margin: 0 auto;
             box-shadow: 0 0 20px rgba(255, 0, 127, 0.2);
+        }
+
+        /* --- PANTALLA DE VICTORIA (ANIMACIÓN) --- */
+        .victory-screen {
+            display: none; /* Oculta por defecto */
+            position: absolute;
+            top: 4px; left: 4px; right: 4px; bottom: 4px;
+            background-color: rgba(0, 0, 0, 0.9);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .victory-screen img {
+            max-width: 220px;
+            height: auto;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite ease-in-out;
+        }
+
+        .victory-screen h2 {
+            color: #39ff14;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px #39ff14;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .victory-screen p {
+            color: #ffffff;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
         }
 
         .controls-info {
@@ -161,11 +214,19 @@
     <main>
         <div class="arcade-container">
             <div class="score-board">
-                <span>SCORE: <span id="score">00</span></span>
+                <span>SCORE: <span id="score">0000</span></span>
                 <span>LIVES: <span>💖💖💖</span></span>
             </div>
             
-            <canvas id="gameCanvas" width="600" height="600"></canvas>
+            <div class="canvas-wrapper">
+                <canvas id="gameCanvas" width="660" height="660"></canvas>
+                
+                <div class="victory-screen" id="victoryScreen">
+                    <img src="panso.png" alt="Rana Pansa">
+                    <h2>¡FELICIDADES GANASTE!</h2>
+                    <p>Te comiste todas las paletas de Crazy Pop</p>
+                </div>
+            </div>
             
             <div class="controls-info">
                 RANITA ARCADE: Usa las <span>FLECHAS DEL TECLADO</span>
@@ -181,11 +242,14 @@
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         const scoreElement = document.getElementById("score");
+        const victoryScreen = document.getElementById("victoryScreen");
 
-        const tileSize = 30; // Tamaño de cada bloque adaptado para mapa 20x20
+        const tileSize = 30; 
         let score = 0;
+        let totalItems = 0; // Contador dinámico de coleccionables
+        let isGameWon = false;
 
-        // --- CARGA DE TU SPRITE ART PERSONALIZADO ---
+        // --- CARGA DE IMÁGENES ---
         const imgOpen = new Image();
         imgOpen.src = 'open.png';
 
@@ -195,68 +259,104 @@
         const imgPale = new Image();
         imgPale.src = 'pale.png';
 
-        // Estructura de la Ranita con alineación de rejilla perfecta (Velocidad submúltiplo del TileSize)
+        const imgPale2 = new Image();
+        imgPale2.src = 'pale2.png';
+
+        // Ranita con alineación de rejilla optimizada
         const pacman = {
-            x: 30, // Posición exacta en pixeles (Fila 1, Col 1)
+            x: 30, 
             y: 30,
-            speed: 3, // 30 es perfectamente divisible por 3 (¡No más atascos a medias!)
+            speed: 3, 
             dx: 0,
             dy: 0,
-            requestedDx: 0, // Almacena el siguiente giro deseado
+            requestedDx: 0, 
             requestedDy: 0,
             animationTimer: 0,
             useOpenSprite: true,
             direction: 'right'
         };
 
-        // Escuadrón de 5 fantasmas con velocidades ajustadas para alineación perfecta
+        // Escuadrón aumentado de 5 fantasmas veloces
         const ghosts = [
-            { x: 270, y: 270, dx: 3,  dy: 0,  speed: 3 },
-            { x: 300, y: 270, dx: -3, dy: 0,  speed: 3 },
-            { x: 270, y: 300, dx: 0,  dy: -3, speed: 3 },
-            { x: 300, y: 300, dx: 0,  dy: 3,  speed: 3 },
-            { x: 30,  y: 540, dx: 3,  dy: 0,  speed: 3 }
+            { x: 300, y: 300, dx: 3,  dy: 0,  speed: 3 },
+            { x: 330, y: 300, dx: -3, dy: 0,  speed: 3 },
+            { x: 300, y: 330, dx: 0,  dy: -3, speed: 3 },
+            { x: 330, y: 330, dx: 0,  dy: 3,  speed: 3 },
+            { x: 600, y: 600, dx: -3, dy: 0,  speed: 3 }
         ];
 
-        // MAPA GIGANTE MEJORADO (20 filas x 20 columnas)
-        // 1 = Pared Verde, 0 = Paleta Helada (pale.png), 2 = Vacío
+        /* MAPA GIGANTE OSCURO (22 filas x 22 columnas)
+           1 = Muro Oscuro
+           0 = Espacio con item (Se decide dinámicamente si es pale, pale2 o círculo en el inicio)
+           2 = Vacío (Cajas de aparición de fantasmas y spawn)
+        */
         const map = [
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
-            [1,0,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,0,1],
-            [1,0,1,1,0,1,1,1,0,0,0,0,1,1,1,0,1,1,0,1],
-            [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
-            [1,0,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,0,1],
-            [1,0,0,0,0,1,0,0,0,1,1,0,0,0,1,0,0,0,0,1],
-            [1,1,1,1,0,1,1,1,2,1,1,2,1,1,1,0,1,1,1,1],
-            [1,2,2,1,0,1,2,2,2,2,2,2,2,2,1,0,1,2,2,1],
-            [1,1,1,1,0,1,2,1,1,2,2,1,1,2,1,0,1,1,1,1],
-            [1,2,2,2,0,2,2,1,2,2,2,2,1,2,2,0,2,2,2,1],
-            [1,1,1,1,0,1,2,1,1,1,1,1,1,2,1,0,1,1,1,1],
-            [1,2,2,1,0,1,2,2,2,2,2,2,2,2,1,0,1,2,2,1],
-            [1,1,1,1,0,1,2,1,1,1,1,1,1,2,1,0,1,1,1,1],
-            [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
-            [1,0,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,0,1],
-            [1,0,0,1,0,0,0,0,0,2,2,0,0,0,0,0,1,0,0,1],
-            [1,1,0,1,0,1,0,1,1,1,1,1,1,0,1,0,1,0,1,1],
-            [1,0,0,0,0,1,0,0,0,1,1,0,0,0,1,0,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,2,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,0,1,1,1,1,0,1,1,0,1,1,1,1,0,1,1,0,1],
+            [1,0,1,1,0,1,1,1,1,0,0,0,0,1,1,1,1,0,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,0,1,0,1,1,1,1,1,1,1,1,0,1,0,1,1,0,1],
+            [1,0,0,0,0,1,0,0,0,0,1,1,0,0,0,0,1,0,0,0,0,1],
+            [1,1,1,1,0,1,1,1,1,2,1,1,2,1,1,1,1,0,1,1,1,1],
+            [1,2,2,1,0,1,2,2,2,2,2,2,2,2,2,2,1,0,1,2,2,1],
+            [1,1,1,1,0,1,2,1,1,1,2,2,1,1,1,2,1,0,1,1,1,1],
+            [1,2,2,2,0,2,2,1,2,2,2,2,2,2,1,2,2,0,2,2,2,1],
+            [1,2,2,2,0,2,2,1,2,2,2,2,2,2,1,2,2,0,2,2,2,1],
+            [1,1,1,1,0,1,2,1,1,1,1,1,1,1,1,2,1,0,1,1,1,1],
+            [1,2,2,1,0,1,2,2,2,2,2,2,2,2,2,2,1,0,1,2,2,1],
+            [1,1,1,1,0,1,2,1,1,1,1,1,1,1,1,2,1,0,1,1,1,1],
+            [1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,0,1,1,1,1,0,1,1,0,1,1,1,1,0,1,1,0,1],
+            [1,0,0,1,0,0,0,0,0,0,2,2,0,0,0,0,0,0,1,0,0,1],
+            [1,1,0,1,0,1,0,1,1,1,1,1,1,1,1,0,1,0,1,0,1,1],
+            [1,0,0,0,0,1,0,0,0,0,1,1,0,0,0,0,1,0,0,0,0,1],
+            [1,0,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,0,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ];
+
+        /* Matriz secundaria para clasificar el tipo de punto de forma balanceada:
+           'p1' = pale.png, 'p2' = pale2.png, 'c' = círculo clásico (sin sprite)
+        */
+        const itemTypeMap = [];
+
+        function initItems() {
+            for (let r = 0; r < map.length; r++) {
+                itemTypeMap[r] = [];
+                for (let c = 0; c < map[r].length; c++) {
+                    if (map[r][c] === 0) {
+                        totalItems++; // Contamos el punto para la condición de ganar
+                        let rand = Math.random();
+                        if (rand < 0.25) {
+                            itemTypeMap[r][c] = 'p1'; // 25% de probabilidad pale.png
+                        } else if (rand < 0.50) {
+                            itemTypeMap[r][c] = 'p2'; // 25% de probabilidad pale2.png
+                        } else {
+                            itemTypeMap[r][c] = 'c';  // 50% de círculos tradicionales para no saturar
+                        }
+                    }
+                }
+            }
+        }
 
         function drawMap() {
             for (let r = 0; r < map.length; r++) {
                 for (let c = 0; c < map[r].length; c++) {
                     if (map[r][c] === 1) {
-                        ctx.fillStyle = "#39ff14"; 
+                        // MUROS OSCUROS: Color elegante para que resalten los fosforescentes
+                        ctx.fillStyle = "#121218"; 
                         ctx.fillRect(c * tileSize, r * tileSize, tileSize, tileSize);
-                        ctx.strokeStyle = "#000000";
+                        ctx.strokeStyle = "#050508";
                         ctx.strokeRect(c * tileSize, r * tileSize, tileSize, tileSize);
                     } else if (map[r][c] === 0) {
-                        // Renderizar tu sprite pale.png centrado en la cuadrícula
-                        if (imgPale.complete && imgPale.width > 0) {
+                        let type = itemTypeMap[r][c];
+
+                        if (type === 'p1' && imgPale.complete && imgPale.width > 0) {
                             ctx.drawImage(imgPale, c * tileSize + 4, r * tileSize + 4, tileSize - 8, tileSize - 8);
+                        } else if (type === 'p2' && imgPale2.complete && imgPale2.width > 0) {
+                            ctx.drawImage(imgPale2, c * tileSize + 4, r * tileSize + 4, tileSize - 8, tileSize - 8);
                         } else {
-                            // Respaldo de emergencia por si no se encuentra el archivo pale.png
+                            // Círculo tradicional rosa neón sin sprite
                             ctx.beginPath();
                             ctx.arc(c * tileSize + tileSize/2, r * tileSize + tileSize/2, 4, 0, Math.PI * 2);
                             ctx.fillStyle = "#ff007f";
@@ -272,19 +372,15 @@
             ctx.save();
             ctx.translate(pacman.x + tileSize/2, pacman.y + tileSize/2);
             
-            // Rotación del Sprite según dirección
             if (pacman.direction === 'left') ctx.rotate(Math.PI);
             if (pacman.direction === 'up') ctx.rotate(-Math.PI / 2);
             if (pacman.direction === 'down') ctx.rotate(Math.PI / 2);
 
-            // Determinar qué frame de tu ranita renderizar
             let currentImg = pacman.useOpenSprite ? imgOpen : imgClose;
 
             if (currentImg.complete && currentImg.width > 0) {
-                // Dibuja tu ranita pixelart perfecta
                 ctx.drawImage(currentImg, -tileSize/2, -tileSize/2, tileSize, tileSize);
             } else {
-                // Vector de emergencia por si se rompen los nombres de los archivos
                 ctx.beginPath();
                 ctx.arc(0, 0, tileSize/2.5, 0.2 * Math.PI, 1.8 * Math.PI);
                 ctx.lineTo(0, 0);
@@ -301,7 +397,7 @@
                 ctx.arc(g.x + tileSize/2, g.y + tileSize/2, tileSize/2.5, Math.PI, 0, false);
                 ctx.lineTo(g.x + tileSize/2 + tileSize/2.5, g.y + tileSize/2 + tileSize/2.5);
                 ctx.lineTo(g.x + tileSize/2 - tileSize/2.5, g.y + tileSize/2 + tileSize/2.5);
-                ctx.fillStyle = "#39ff14";
+                ctx.fillStyle = "#39ff14"; // Fantasmas Verde Fosfo
                 ctx.fill();
                 ctx.shadowBlur = 8;
                 ctx.shadowColor = "#39ff14";
@@ -310,7 +406,6 @@
             });
         }
 
-        // Valida si la posición pixel exacta golpea los muros verdes
         function isColliding(x, y) {
             if (x % tileSize === 0 && y % tileSize === 0) {
                 const col = x / tileSize;
@@ -322,9 +417,10 @@
         }
 
         function update() {
-            // CONTROL DE REJILLA PERFECTA: Solo calcula giros cuando estás centrado en una celda
+            if (isGameWon) return; // Parar cálculos si ya ganó
+
+            // Sistema de movimiento de precisión fija
             if (pacman.x % tileSize === 0 && pacman.y % tileSize === 0) {
-                // Intenta meter la dirección guardada/solicitada
                 if (!isColliding(pacman.x + pacman.requestedDx * tileSize, pacman.y + pacman.requestedDy * tileSize)) {
                     pacman.dx = pacman.requestedDx;
                     pacman.dy = pacman.requestedDy;
@@ -334,18 +430,16 @@
                     if(pacman.dy < 0) pacman.direction = 'up';
                 }
                 
-                // Si el camino actual tiene un muro enfrente, detén en seco a la ranita
                 if (isColliding(pacman.x + pacman.dx * tileSize, pacman.y + pacman.dy * tileSize)) {
                     pacman.dx = 0;
                     pacman.dy = 0;
                 }
             }
 
-            // Aplicar movimiento fluido
             pacman.x += pacman.dx * pacman.speed;
             pacman.y += pacman.dy * pacman.speed;
 
-            // Animación de la boca (cambia de open a close cada 8 fotogramas si se está moviendo)
+            // Transición de la boca al caminar
             if (pacman.dx !== 0 || pacman.dy !== 0) {
                 pacman.animationTimer++;
                 if (pacman.animationTimer > 8) {
@@ -354,26 +448,32 @@
                 }
             }
 
-            // Comer paletas heladas
+            // Comer elementos del mapa
             if (pacman.x % tileSize === 0 && pacman.y % tileSize === 0) {
                 const col = pacman.x / tileSize;
                 const row = pacman.y / tileSize;
                 if (map[row] && map[row][col] === 0) {
-                    map[row][col] = 2; // Desaparecer paleta
+                    map[row][col] = 2; 
                     score += 10;
-                    scoreElement.innerText = score;
+                    totalItems--; // Restamos del contador de victoria
+                    scoreElement.innerText = score.toString().padStart(4, '0');
+
+                    // DETECTAR VICTORIA
+                    if (totalItems <= 0) {
+                        isGameWon = true;
+                        victoryScreen.style.display = 'flex'; // Despliega la animación de la pansa
+                    }
                 }
             }
 
-            // Movimiento e inteligencia de los 5 fantasmas sincronizados
+            // Patrullaje de Fantasmas
             ghosts.forEach(g => {
                 if (g.x % tileSize === 0 && g.y % tileSize === 0) {
-                    if (isColliding(g.x + g.dx * tileSize, g.y + g.dy * tileSize) || Math.random() < 0.2) {
+                    if (isColliding(g.x + g.dx * tileSize, g.y + g.dy * tileSize) || Math.random() < 0.15) {
                         const dirs = [
                             {dx: 1, dy: 0}, {dx: -1, dy: 0},
                             {dx: 0, dy: 1}, {dx: 0, dy: -1}
                         ];
-                        // Filtrar solo caminos válidos donde no haya muros verdes
                         const validDirs = dirs.filter(d => !isColliding(g.x + d.dx * tileSize, g.y + d.dy * tileSize));
                         if (validDirs.length > 0) {
                             const choice = validDirs[Math.floor(Math.random() * validDirs.length)];
@@ -388,8 +488,8 @@
 
                 // Colisión letal
                 const dist = Math.hypot((pacman.x + tileSize/2) - (g.x + tileSize/2), (pacman.y + tileSize/2) - (g.y + tileSize/2));
-                if (dist < tileSize * 0.7) {
-                    alert("GAME OVER - ¡Te atraparon! Sabor Final: " + score);
+                if (dist < tileSize * 0.65) {
+                    alert("GAME OVER - ¡Te derritieron! Marcador: " + score);
                     document.location.reload();
                 }
             });
@@ -404,11 +504,13 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // CAPTURA DE ENTRADAS CON BUFFER DE MEMORIA
+        // CONTROL DE FLECHAS CON BUFFER
         window.addEventListener("keydown", (e) => {
             if(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
                 e.preventDefault(); 
             }
+
+            if (isGameWon) return; // Desactivar teclas si ya ganó
 
             switch(e.key) {
                 case "ArrowUp":
@@ -426,6 +528,8 @@
             }
         });
 
+        // Inicializar conteo e iniciar ciclo principal
+        initItems();
         gameLoop();
     </script>
 </body>
