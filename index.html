@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paletas Heladas - Lobby</title>
+    <style>
+        /* --- ESTILOS GLOBALES Y PALETA DE COLORES --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #121212; /* Fondo oscuro profundo */
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- MENÚ DE NAVEGACIÓN SUPERIOR --- */
+        header {
+            background-color: #000000;
+            padding: 15px 20px;
+            border-bottom: 3px solid #39ff14; /* Línea verde neón */
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ff007f; /* Rosa fosforescente */
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #ff007f;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #39ff14; /* Verde neón */
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        /* Efecto al pasar el cursor sobre los enlaces */
+        .nav-links a:hover, .nav-links a.active {
+            background-color: #39ff14;
+            color: #000000;
+            box-shadow: 0 0 15px #39ff14;
+        }
+
+        /* --- CONTENIDO PRINCIPAL --- */
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Tarjeta contenedora estilo la imagen */
+        .welcome-card {
+            background-color: #1e1e1e;
+            border: 4px solid #ff007f;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 0 25px rgba(255, 0, 127, 0.4);
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decoración de esquina fosforescente */
+        .welcome-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 40px;
+            height: 40px;
+            background-color: #ccff00; /* Amarillo/Verde limón */
+            box-shadow: 0 0 15px #ccff00;
+            clip-path: polygon(0 0, 100% 0, 0 100%);
+        }
+
+        h1 {
+            color: #ccff00; /* Amarillo limón fosforito */
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(204, 255, 0, 0.6);
+        }
+
+        p {
+            color: #ffffff;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .highlight-text {
+            color: #39ff14;
+            font-weight: bold;
+        }
+
+        /* Botón de acción */
+        .btn-neon {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: transparent;
+            color: #ff007f;
+            border: 3px solid #ff007f;
+            text-decoration: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.2);
+        }
+
+        .btn-neon:hover {
+            background-color: #ff007f;
+            color: #ffffff;
+            box-shadow: 0 0 20px #ff007f;
+            transform: scale(1.05);
+        }
+
+        /* --- PIE DE PÁGINA --- */
+        footer {
+            background-color: #050505;
+            text-align: center;
+            padding: 15px;
+            font-size: 0.8rem;
+            color: #666666;
+            border-top: 1px solid #1a1a1a;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <nav>
+            <div class="logo">Ice Neon 🍧</div>
+            <ul class="nav-links">
+                <li><a href="index.html" class="active">Lobby</a></li>
+                <li><a href="1.html">Sección 1</a></li>
+                <li><a href="2.html">Sección 2</a></li>
+                <li><a href="3.html">Sección 3</a></li>
+                <li><a href="4.html">Sección 4</a></li>
+                <li><a href="5.html">Sección 5</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="welcome-card">
+            <h1>¡Bienvenidos!</h1>
+            <p>Estás en el lobby oficial de nuestra empresa de <span class="highlight-text">paletas heladas</span>. Prepárate para una explosión de sabor bajo cero con el estilo más vivo y fosforescente de la web.</p>
+            <a href="1.html" class="btn-neon">Ver Catálogo</a>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Empresa de Paletas - Todos los derechos reservados.</p>
+    </footer>
+
+</body>
+</html>
