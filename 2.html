@@ -248,7 +248,7 @@
             </div>
             
             <div class="controls-info">
-                Paleta 1: <span>VELOCIDAD ROSA</span> | Paleta 2: <em>SÚPER PODER VERDE</em>
+                ¡Combina los Buffs! <span>VELOCIDAD (P1)</span> + <em>FUERZA (P2)</em> = <span>D</span><em>O</em><span>B</span><em>L</em><span>E</span> Brillo Acumulado
             </div>
         </div>
     </main>
@@ -270,6 +270,7 @@
         let lives = 3;
         let totalItems = 0; 
         let isGameOver = false;
+        let globalPulseTimer = 0; // Para el efecto alternante de luces neón
 
         // --- CARGA DE IMÁGENES ---
         const imgOpen = new Image(); imgOpen.src = 'open.png';
@@ -277,7 +278,7 @@
         const imgPale = new Image(); imgPale.src = 'pale.png';
         const imgPale2 = new Image(); imgPale2.src = 'pale2.png';
 
-        // Estructura de la Ranita con velocidad inicial base
+        // Estructura de la Ranita
         const pacman = {
             x: 30, y: 30, 
             baseSpeed: 3,
@@ -287,22 +288,20 @@
             animationTimer: 0, useOpenSprite: true,
             direction: 'right',
             
-            // Mecánica Paleta 2 (Fuerza)
+            // Buffs Independientes y Acumulables
             superMode: false,
             superTimer: 0,
-            
-            // Mecánica Paleta 1 (Velocidad)
             speedMode: false,
             speedTimer: 0
         };
 
-        // Escuadrón de fantasmas
+        // Escuadrón de fantasmas con IA mejorada anti-atascamiento
         const ghosts = [
-            { x: 300, y: 300, startX: 300, startY: 300, dx: 3, dy: 0, speed: 3, isDead: false, respawnTimer: 0 },
-            { x: 330, y: 300, startX: 330, startY: 300, dx: -3, dy: 0, speed: 3, isDead: false, respawnTimer: 0 },
-            { x: 300, y: 330, startX: 300, startY: 330, dx: 0, dy: -3, speed: 3, isDead: false, respawnTimer: 0 },
-            { x: 330, y: 330, startX: 330, startY: 330, dx: 0, dy: 3, speed: 3, isDead: false, respawnTimer: 0 },
-            { x: 600, y: 600, startX: 600, startY: 600, dx: -3, dy: 0, speed: 3, isDead: false, respawnTimer: 0 }
+            { x: 300, y: 300, startX: 300, startY: 300, dx: 3, dy: 0, speed: 3, isDead: false, respawnTimer: 0, lastGridX: 0, lastGridY: 0, stuckCounter: 0 },
+            { x: 330, y: 300, startX: 330, startY: 300, dx: -3, dy: 0, speed: 3, isDead: false, respawnTimer: 0, lastGridX: 0, lastGridY: 0, stuckCounter: 0 },
+            { x: 300, y: 330, startX: 300, startY: 330, dx: 0, dy: -3, speed: 3, isDead: false, respawnTimer: 0, lastGridX: 0, lastGridY: 0, stuckCounter: 0 },
+            { x: 330, y: 330, startX: 330, startY: 330, dx: 0, dy: 3, speed: 3, isDead: false, respawnTimer: 0, lastGridX: 0, lastGridY: 0, stuckCounter: 0 },
+            { x: 600, y: 600, startX: 600, startY: 600, dx: -3, dy: 0, speed: 3, isDead: false, respawnTimer: 0, lastGridX: 0, lastGridY: 0, stuckCounter: 0 }
         ];
 
         // MAPA GIGANTE OSCURO (22x22)
@@ -361,9 +360,9 @@
                         totalItems++; 
                         let rand = Math.random();
                         if (rand < 0.08) { 
-                            itemTypeMap[r][c] = 'p1'; // 8% de paleta normal (Velocidad)
+                            itemTypeMap[r][c] = 'p1'; 
                         } else if (rand < 0.14) { 
-                            itemTypeMap[r][c] = 'p2'; // 6% de paleta rara (Fuerza)
+                            itemTypeMap[r][c] = 'p2'; 
                         } else {
                             itemTypeMap[r][c] = 'c';  
                         }
@@ -374,8 +373,10 @@
             ghosts.forEach(g => {
                 g.x = g.startX; g.y = g.startY;
                 g.isDead = false; g.respawnTimer = 0;
+                g.stuckCounter = 0;
+                // Forzar salida inicial mandándolos en direcciones de dispersión
                 g.dx = Math.random() > 0.5 ? 3 : -3;
-                g.dy = 0;
+                g.dy = Math.random() > 0.5 ? 3 : -3;
             });
         }
 
@@ -413,13 +414,17 @@
             if (pacman.direction === 'up') ctx.rotate(-Math.PI / 2);
             if (pacman.direction === 'down') ctx.rotate(Math.PI / 2);
 
-            // CONTROL DE BRILLOS FOSFORESCENTES SEPARADOS
-            if (pacman.superMode) {
+            // CÁLCULO DE BRILLOS ACUMULADOS / STACKING VISUAL
+            if (pacman.superMode && pacman.speedMode) {
+                // Brillo combinado mágico: cambia cada 8 cuadros entre verde y rosa
+                ctx.shadowBlur = 22;
+                ctx.shadowColor = (Math.floor(globalPulseTimer / 8) % 2 === 0) ? "#39ff14" : "#ff007f";
+            } else if (pacman.superMode) {
                 ctx.shadowBlur = 18;
-                ctx.shadowColor = "#39ff14"; // Brillo Verde Fosfo para Fuerza
+                ctx.shadowColor = "#39ff14"; // Solo fuerza (Verde)
             } else if (pacman.speedMode) {
                 ctx.shadowBlur = 18;
-                ctx.shadowColor = "#ff007f"; // Brillo Rosa Fosfo para Velocidad
+                ctx.shadowColor = "#ff007f"; // Solo velocidad (Rosa)
             }
 
             let currentImg = pacman.useOpenSprite ? imgOpen : imgClose;
@@ -447,8 +452,8 @@
                 ctx.lineTo(g.x + tileSize/2 + tileSize/2.5, g.y + tileSize/2 + tileSize/2.5);
                 ctx.lineTo(g.x + tileSize/2 - tileSize/2.5, g.y + tileSize/2 + tileSize/2.5);
                 
-                // Si la rana está en súper modo (verde), los fantasmas se asustan (rosa)
-                ctx.fillStyle = pacman.superMode ? "#ff007f" : "#39ff14"; 
+                // Si la rana puede morderlos, se vuelven morados/azules asustados
+                ctx.fillStyle = pacman.superMode ? "#4d00ff" : "#39ff14"; 
                 ctx.fill();
                 ctx.shadowBlur = 8;
                 ctx.shadowColor = ctx.fillStyle;
@@ -470,7 +475,19 @@
         function update() {
             if (isGameOver) return;
 
-            // Manejo del temporizador de la Paleta 2 (Fuerza / Súper)
+            globalPulseTimer++;
+
+            // Cuenta regresiva del modo velocidad
+            if (pacman.speedMode) {
+                pacman.speedTimer--;
+                if (pacman.speedTimer <= 0) {
+                    pacman.speedMode = false;
+                    // Solo bajar la velocidad si NO tiene puesto el buff en combo que requiera alteración
+                    if (!pacman.superMode) pacman.currentSpeed = pacman.baseSpeed;
+                }
+            }
+
+            // Cuenta regresiva del modo súper fuerza
             if (pacman.superMode) {
                 pacman.superTimer--;
                 if (pacman.superTimer <= 0) {
@@ -478,16 +495,14 @@
                 }
             }
 
-            // Manejo del temporizador de la Paleta 1 (Velocidad Rosa)
+            // Fijar velocidad real según buffs acumulados
             if (pacman.speedMode) {
-                pacman.speedTimer--;
-                if (pacman.speedTimer <= 0) {
-                    pacman.speedMode = false;
-                    pacman.currentSpeed = pacman.baseSpeed; // Vuelve a velocidad 3
-                }
+                pacman.currentSpeed = 5; 
+            } else {
+                pacman.currentSpeed = pacman.baseSpeed; 
             }
 
-            // Movimiento preciso en rejilla adaptable (Soporta velocidad 3 y 5 perfectamente)
+            // Control e intersecciones de la ranita
             if (pacman.x % tileSize === 0 && pacman.y % tileSize === 0) {
                 if (!isColliding(pacman.x + pacman.requestedDx * tileSize, pacman.y + pacman.requestedDy * tileSize)) {
                     pacman.dx = pacman.requestedDx;
@@ -505,7 +520,6 @@
             pacman.x += pacman.dx * pacman.currentSpeed;
             pacman.y += pacman.dy * pacman.currentSpeed;
 
-            // Velocidad de animación de la boca según lo rápido que camina
             if (pacman.dx !== 0 || pacman.dy !== 0) {
                 pacman.animationTimer += pacman.speedMode ? 2 : 1;
                 if (pacman.animationTimer > 8) {
@@ -514,7 +528,7 @@
                 }
             }
 
-            // Comer ítems
+            // Registro de colisión con los coleccionables
             if (pacman.x % tileSize === 0 && pacman.y % tileSize === 0) {
                 const col = pacman.x / tileSize;
                 const row = pacman.y / tileSize;
@@ -525,24 +539,14 @@
                     totalItems--;
                     scoreElement.innerText = score.toString().padStart(4, '0');
 
-                    // MECÁNICA PALETA 1: ¡VELOCIDAD EXTRA Y BRILLO ROSA!
+                    // ACUMULACIÓN: Suma el nuevo estado sin borrar el anterior
                     if (consumedType === 'p1') {
                         pacman.speedMode = true;
-                        pacman.currentSpeed = 5; // Sube velocidad (30 es divisible por 5)
-                        pacman.speedTimer = 300; // 5 segundos a 60fps
-                        
-                        // Cortar súper modo para evitar cruce de poderes conflictivos
-                        pacman.superMode = false; 
+                        pacman.speedTimer = 360; // 6 segundos de velocidad
                     }
-
-                    // MECÁNICA PALETA 2: FUERZA Y BRILLO VERDE
                     if (consumedType === 'p2') {
                         pacman.superMode = true;
-                        pacman.superTimer = 420; // 7 segundos
-                        
-                        // Quitar velocidad para balancear el estado de ataque
-                        pacman.speedMode = false;
-                        pacman.currentSpeed = pacman.baseSpeed;
+                        pacman.superTimer = 480; // 8 segundos de fuerza
                     }
 
                     if (totalItems <= 0) {
@@ -552,26 +556,63 @@
                 }
             }
 
-            // IA y movimiento de Fantasmas
+            // SISTEMA INTELIGENTE DE FANTASMAS (INTELLIGENT ANTI-STUCK IA)
             ghosts.forEach(g => {
                 if (g.isDead) {
                     g.respawnTimer--;
                     if (g.respawnTimer <= 0) {
                         g.isDead = false;
                         g.x = g.startX; g.y = g.startY; 
+                        g.stuckCounter = 0;
+                        // Expulsión forzada hacia arriba para sacarlos del centro rápido
+                        g.dx = 0; g.dy = -3;
                     }
                     return; 
                 }
 
+                // Detector de estancamiento
+                let currentGridX = Math.floor(g.x / tileSize);
+                let currentGridY = Math.floor(g.y / tileSize);
+
                 if (g.x % tileSize === 0 && g.y % tileSize === 0) {
-                    if (isColliding(g.x + g.dx * tileSize, g.y + g.dy * tileSize) || Math.random() < 0.15) {
+                    // Si sigue en el mismo bloque exacto del centro, eleva su molestia
+                    if (currentGridX === g.lastGridX && currentGridY === g.lastGridY && (currentGridX >= 9 && currentGridX <= 13 && currentGridY >= 8 && currentGridY <= 13)) {
+                        g.stuckCounter++;
+                    } else {
+                        g.stuckCounter = 0;
+                    }
+
+                    g.lastGridX = currentGridX;
+                    g.lastGridY = currentGridY;
+
+                    // Si el fantasma se queda atrapado en el centro, lo obligamos a tomar una ruta externa lejana
+                    let forceScattering = (g.stuckCounter > 15);
+
+                    if (isColliding(g.x + g.dx * tileSize, g.y + g.dy * tileSize) || Math.random() < 0.12 || forceScattering) {
                         const dirs = [
                             {dx: 1, dy: 0}, {dx: -1, dy: 0}, {dx: 0, dy: 1}, {dx: 0, dy: -1}
                         ];
-                        const validDirs = dirs.filter(d => !isColliding(g.x + d.dx * tileSize, g.y + d.dy * tileSize));
+                        
+                        // Filtrar giros válidos para que no caminen contra la pared
+                        let validDirs = dirs.filter(d => !isColliding(g.x + d.dx * tileSize, g.y + d.dy * tileSize));
+                        
+                        // Evitar que regresen de inmediato por donde venían a menos que sea un callejón sin salida
+                        if (validDirs.length > 1 && !forceScattering) {
+                            validDirs = validDirs.filter(d => d.dx !== -g.dx || d.dy !== -g.dy);
+                        }
+
                         if (validDirs.length > 0) {
-                            const choice = validDirs[Math.floor(Math.random() * validDirs.length)];
-                            g.dx = choice.dx; g.dy = choice.dy;
+                            let choice = validDirs[Math.floor(Math.random() * validDirs.length)];
+                            
+                            // Si estaba atascado en el centro, lo forzamos a huir verticalmente hacia los pasillos exteriores
+                            if (forceScattering) {
+                                let escapeRoute = validDirs.find(d => d.dy === -1 || d.dy === 1);
+                                if (escapeRoute) choice = escapeRoute;
+                                g.stuckCounter = 0;
+                            }
+                            
+                            g.dx = choice.dx; 
+                            g.dy = choice.dy;
                         }
                     }
                 }
@@ -579,23 +620,22 @@
                 g.x += g.dx * g.speed;
                 g.y += g.dy * g.speed;
 
-                // Cálculos de contacto físico
+                // Colisiones físicas
                 const dist = Math.hypot((pacman.x + tileSize/2) - (g.x + tileSize/2), (pacman.y + tileSize/2) - (g.y + tileSize/2));
                 if (dist < tileSize * 0.65) {
                     if (pacman.superMode) {
-                        // Cazando al fantasma
                         g.isDead = true;
-                        g.respawnTimer = 240; 
+                        g.respawnTimer = 180; // Tiempo en la congeladora del centro
                         score += 100;
                         scoreElement.innerText = score.toString().padStart(4, '0');
                     } else {
-                        // El fantasma golpea a la rana (Incluso si va rápido con brillo rosa)
                         lives--;
                         livesContainer.innerText = "💖".repeat(lives);
                         if (lives <= 0) {
                             isGameOver = true;
                             gameOverScreen.style.display = 'flex';
                         } else {
+                            // Reset parcial al perder una vida
                             pacman.x = 30; pacman.y = 30;
                             pacman.dx = 0; pacman.dy = 0;
                             pacman.requestedDx = 0; pacman.requestedDy = 0;
