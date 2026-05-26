@@ -79,7 +79,7 @@
             box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
         }
 
-        /* --- RETRO CABINET (MÁS GRANDE Y CENTRADO) --- */
+        /* --- RETRO CABINET MAX --- */
         main {
             flex: 1;
             display: flex;
@@ -93,20 +93,20 @@
             background-color: #000000;
             border: 4px dashed #39ff14;
             outline: 4px solid #ff007f;
-            padding: 25px;
+            padding: 20px;
             border-radius: 4px;
             box-shadow: 0 0 45px rgba(255, 0, 127, 0.35);
             text-align: center;
-            max-width: 620px; /* Aumentado para contener el mapa grande */
+            max-width: 660px; /* Tamaño ideal para la nueva escala visual */
             width: 100%;
         }
 
         .score-board {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             color: #39ff14;
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             font-weight: bold;
             text-shadow: 0 0 5px #39ff14;
             text-transform: uppercase;
@@ -121,9 +121,9 @@
         }
 
         .controls-info {
-            margin-top: 20px;
+            margin-top: 15px;
             color: #888888;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -165,10 +165,10 @@
                 <span>LIVES: <span>💖💖💖</span></span>
             </div>
             
-            <canvas id="gameCanvas" width="560" height="560"></canvas>
+            <canvas id="gameCanvas" width="600" height="600"></canvas>
             
             <div class="controls-info">
-                Usa las <span>FLECHAS DEL TECLADO</span> para moverte
+                RANITA ARCADE: Usa las <span>FLECHAS DEL TECLADO</span>
             </div>
         </div>
     </main>
@@ -182,52 +182,65 @@
         const ctx = canvas.getContext("2d");
         const scoreElement = document.getElementById("score");
 
-        const tileSize = 40; 
+        const tileSize = 30; // Tamaño de cada bloque adaptado para mapa 20x20
         let score = 0;
 
-        /* --- PREPARACIÓN PARA SPRITESfuturos ---
-           Puedes descomentar estas líneas cuando tengas listos tus archivos de imagen:
-           const pacmanSprite = new Image();
-           pacmanSprite.src = 'pacman-sheet.png'; 
-        */
-        const useSprites = false; // Cambia a true cuando integres las imágenes
+        // --- CARGA DE TU SPRITE ART PERSONALIZADO ---
+        const imgOpen = new Image();
+        imgOpen.src = 'open.png';
 
-        // Jugador con propiedades de animación listas
+        const imgClose = new Image();
+        imgClose.src = 'close.png';
+
+        const imgPale = new Image();
+        imgPale.src = 'pale.png';
+
+        // Estructura de la Ranita con alineación de rejilla perfecta (Velocidad submúltiplo del TileSize)
         const pacman = {
-            x: 60,
-            y: 60,
-            size: 14,
+            x: 30, // Posición exacta en pixeles (Fila 1, Col 1)
+            y: 30,
+            speed: 3, // 30 es perfectamente divisible por 3 (¡No más atascos a medias!)
             dx: 0,
             dy: 0,
-            speed: 4,
-            spriteFrame: 0, // Para controlar qué frame del sprite usar
-            direction: 'right' // Para rotar el dibujo o el sprite
+            requestedDx: 0, // Almacena el siguiente giro deseado
+            requestedDy: 0,
+            animationTimer: 0,
+            useOpenSprite: true,
+            direction: 'right'
         };
 
-        // Arreglo de múltiples fantasmas
+        // Escuadrón de 5 fantasmas con velocidades ajustadas para alineación perfecta
         const ghosts = [
-            { x: 260, y: 220, size: 14, dx: 2, dy: 0, speed: 2, spriteFrame: 0 },
-            { x: 300, y: 260, size: 14, dx: -2, dy: 0, speed: 2, spriteFrame: 1 },
-            { x: 60,  y: 500, size: 14, dx: 0, dy: -2, speed: 2, spriteFrame: 2 }
+            { x: 270, y: 270, dx: 3,  dy: 0,  speed: 3 },
+            { x: 300, y: 270, dx: -3, dy: 0,  speed: 3 },
+            { x: 270, y: 300, dx: 0,  dy: -3, speed: 3 },
+            { x: 300, y: 300, dx: 0,  dy: 3,  speed: 3 },
+            { x: 30,  y: 540, dx: 3,  dy: 0,  speed: 3 }
         ];
 
-        // MAPA AMPLIADO (14 filas x 14 columnas)
-        // 1 = Pared, 0 = Puntos, 2 = Vacío
+        // MAPA GIGANTE MEJORADO (20 filas x 20 columnas)
+        // 1 = Pared Verde, 0 = Paleta Helada (pale.png), 2 = Vacío
         const map = [
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,0,0,1,1,0,0,0,0,0,1],
-            [1,0,1,1,1,0,1,1,0,1,1,1,0,1],
-            [1,0,1,1,1,0,0,0,0,1,1,1,0,1],
-            [1,0,0,0,0,0,1,1,0,0,0,0,0,1],
-            [1,1,1,0,1,1,1,1,1,1,0,1,1,1],
-            [1,1,1,0,0,0,0,0,0,0,0,1,1,1],
-            [1,1,1,0,1,1,2,2,1,1,0,1,1,1],
-            [1,0,0,0,1,1,2,2,1,1,0,0,0,1],
-            [1,0,1,0,1,1,1,1,1,1,0,1,0,1],
-            [1,0,1,0,0,0,0,0,0,0,0,1,0,1],
-            [1,0,1,1,1,1,0,0,1,1,1,1,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,0,1],
+            [1,0,1,1,0,1,1,1,0,0,0,0,1,1,1,0,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,0,1],
+            [1,0,0,0,0,1,0,0,0,1,1,0,0,0,1,0,0,0,0,1],
+            [1,1,1,1,0,1,1,1,2,1,1,2,1,1,1,0,1,1,1,1],
+            [1,2,2,1,0,1,2,2,2,2,2,2,2,2,1,0,1,2,2,1],
+            [1,1,1,1,0,1,2,1,1,2,2,1,1,2,1,0,1,1,1,1],
+            [1,2,2,2,0,2,2,1,2,2,2,2,1,2,2,0,2,2,2,1],
+            [1,1,1,1,0,1,2,1,1,1,1,1,1,2,1,0,1,1,1,1],
+            [1,2,2,1,0,1,2,2,2,2,2,2,2,2,1,0,1,2,2,1],
+            [1,1,1,1,0,1,2,1,1,1,1,1,1,2,1,0,1,1,1,1],
+            [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
+            [1,0,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,0,1],
+            [1,0,0,1,0,0,0,0,0,2,2,0,0,0,0,0,1,0,0,1],
+            [1,1,0,1,0,1,0,1,1,1,1,1,1,0,1,0,1,0,1,1],
+            [1,0,0,0,0,1,0,0,0,1,1,0,0,0,1,0,0,0,0,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ];
 
         function drawMap() {
@@ -239,124 +252,144 @@
                         ctx.strokeStyle = "#000000";
                         ctx.strokeRect(c * tileSize, r * tileSize, tileSize, tileSize);
                     } else if (map[r][c] === 0) {
-                        ctx.beginPath();
-                        ctx.arc(c * tileSize + tileSize/2, r * tileSize + tileSize/2, 5, 0, Math.PI * 2);
-                        ctx.fillStyle = "#ff007f";
-                        ctx.fill();
-                        ctx.closePath();
+                        // Renderizar tu sprite pale.png centrado en la cuadrícula
+                        if (imgPale.complete && imgPale.width > 0) {
+                            ctx.drawImage(imgPale, c * tileSize + 4, r * tileSize + 4, tileSize - 8, tileSize - 8);
+                        } else {
+                            // Respaldo de emergencia por si no se encuentra el archivo pale.png
+                            ctx.beginPath();
+                            ctx.arc(c * tileSize + tileSize/2, r * tileSize + tileSize/2, 4, 0, Math.PI * 2);
+                            ctx.fillStyle = "#ff007f";
+                            ctx.fill();
+                            ctx.closePath();
+                        }
                     }
                 }
             }
         }
 
-        // Sistema modular para renderizar el Personaje principal
         function drawPacman() {
-            if (useSprites) {
-                // Aquí irá tu lógica de recorte: ctx.drawImage(pacmanSprite, sx, sy, sw, sh, x, y, dw, dh);
-                // Por ahora se calcula un ciclo básico de frames listo para ti:
-                pacman.spriteFrame = (pacman.spriteFrame + 1) % 20; 
-            } else {
-                // Renderizado vectorial actual integrado con rotación según dirección
-                ctx.save();
-                ctx.translate(pacman.x, pacman.y);
-                
-                if (pacman.direction === 'left') ctx.rotate(Math.PI);
-                if (pacman.direction === 'up') ctx.rotate(-Math.PI / 2);
-                if (pacman.direction === 'down') ctx.rotate(Math.PI / 2);
+            ctx.save();
+            ctx.translate(pacman.x + tileSize/2, pacman.y + tileSize/2);
+            
+            // Rotación del Sprite según dirección
+            if (pacman.direction === 'left') ctx.rotate(Math.PI);
+            if (pacman.direction === 'up') ctx.rotate(-Math.PI / 2);
+            if (pacman.direction === 'down') ctx.rotate(Math.PI / 2);
 
+            // Determinar qué frame de tu ranita renderizar
+            let currentImg = pacman.useOpenSprite ? imgOpen : imgClose;
+
+            if (currentImg.complete && currentImg.width > 0) {
+                // Dibuja tu ranita pixelart perfecta
+                ctx.drawImage(currentImg, -tileSize/2, -tileSize/2, tileSize, tileSize);
+            } else {
+                // Vector de emergencia por si se rompen los nombres de los archivos
                 ctx.beginPath();
-                ctx.arc(0, 0, pacman.size, 0.2 * Math.PI, 1.8 * Math.PI);
+                ctx.arc(0, 0, tileSize/2.5, 0.2 * Math.PI, 1.8 * Math.PI);
                 ctx.lineTo(0, 0);
                 ctx.fillStyle = "#ff007f";
                 ctx.fill();
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = "#ff007f";
                 ctx.closePath();
-                ctx.restore();
-                ctx.shadowBlur = 0;
             }
+            ctx.restore();
         }
 
-        // Sistema modular para renderizar los múltiples Fantasmas
         function drawGhosts() {
             ghosts.forEach(g => {
-                if (useSprites) {
-                    // Estructura lista para controlar sprites de los enemigos individualmente
-                    g.spriteFrame = (g.spriteFrame + 1) % 30;
-                } else {
-                    ctx.beginPath();
-                    ctx.arc(g.x, g.y, g.size, Math.PI, 0, false);
-                    ctx.lineTo(g.x + g.size, g.y + g.size);
-                    ctx.lineTo(g.x - g.size, g.y + g.size);
-                    ctx.fillStyle = "#39ff14";
-                    ctx.fill();
-                    ctx.shadowBlur = 10;
-                    ctx.shadowColor = "#39ff14";
-                    ctx.closePath();
-                    ctx.shadowBlur = 0;
-                }
+                ctx.beginPath();
+                ctx.arc(g.x + tileSize/2, g.y + tileSize/2, tileSize/2.5, Math.PI, 0, false);
+                ctx.lineTo(g.x + tileSize/2 + tileSize/2.5, g.y + tileSize/2 + tileSize/2.5);
+                ctx.lineTo(g.x + tileSize/2 - tileSize/2.5, g.y + tileSize/2 + tileSize/2.5);
+                ctx.fillStyle = "#39ff14";
+                ctx.fill();
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = "#39ff14";
+                ctx.closePath();
+                ctx.shadowBlur = 0;
             });
         }
 
-        function canMove(x, y, size) {
-            const topRow = Math.floor((y - size) / tileSize);
-            const botRow = Math.floor((y + size) / tileSize);
-            const leftCol = Math.floor((x - size) / tileSize);
-            const rightCol = Math.floor((x + size) / tileSize);
-
-            if (topRow < 0 || botRow >= map.length || leftCol < 0 || rightCol >= map[0].length) return false;
-
-            if (map[topRow][leftCol] === 1 || map[topRow][rightCol] === 1 ||
-                map[botRow][leftCol] === 1 || map[botRow][rightCol] === 1) {
-                return false;
+        // Valida si la posición pixel exacta golpea los muros verdes
+        function isColliding(x, y) {
+            if (x % tileSize === 0 && y % tileSize === 0) {
+                const col = x / tileSize;
+                const row = y / tileSize;
+                if (row < 0 || row >= map.length || col < 0 || col >= map[0].length) return true;
+                return map[row][col] === 1;
             }
-            return true;
+            return false;
         }
 
         function update() {
-            // Movimiento del jugador
-            let nextX = pacman.x + pacman.dx;
-            let nextY = pacman.y + pacman.dy;
-
-            if (canMove(nextX, nextY, pacman.size)) {
-                pacman.x = nextX;
-                pacman.y = nextY;
+            // CONTROL DE REJILLA PERFECTA: Solo calcula giros cuando estás centrado en una celda
+            if (pacman.x % tileSize === 0 && pacman.y % tileSize === 0) {
+                // Intenta meter la dirección guardada/solicitada
+                if (!isColliding(pacman.x + pacman.requestedDx * tileSize, pacman.y + pacman.requestedDy * tileSize)) {
+                    pacman.dx = pacman.requestedDx;
+                    pacman.dy = pacman.requestedDy;
+                    if(pacman.dx > 0) pacman.direction = 'right';
+                    if(pacman.dx < 0) pacman.direction = 'left';
+                    if(pacman.dy > 0) pacman.direction = 'down';
+                    if(pacman.dy < 0) pacman.direction = 'up';
+                }
+                
+                // Si el camino actual tiene un muro enfrente, detén en seco a la ranita
+                if (isColliding(pacman.x + pacman.dx * tileSize, pacman.y + pacman.dy * tileSize)) {
+                    pacman.dx = 0;
+                    pacman.dy = 0;
+                }
             }
 
-            // Consumir puntos
-            const currentGridX = Math.floor(pacman.x / tileSize);
-            const currentGridY = Math.floor(pacman.y / tileSize);
-            if (map[currentGridY] && map[currentGridY][currentGridX] === 0) {
-                map[currentGridY][currentGridX] = 2;
-                score += 10;
-                scoreElement.innerText = score;
+            // Aplicar movimiento fluido
+            pacman.x += pacman.dx * pacman.speed;
+            pacman.y += pacman.dy * pacman.speed;
+
+            // Animación de la boca (cambia de open a close cada 8 fotogramas si se está moviendo)
+            if (pacman.dx !== 0 || pacman.dy !== 0) {
+                pacman.animationTimer++;
+                if (pacman.animationTimer > 8) {
+                    pacman.useOpenSprite = !pacman.useOpenSprite;
+                    pacman.animationTimer = 0;
+                }
             }
 
-            // Movimiento inteligente básico para cada uno de los fantasmas
+            // Comer paletas heladas
+            if (pacman.x % tileSize === 0 && pacman.y % tileSize === 0) {
+                const col = pacman.x / tileSize;
+                const row = pacman.y / tileSize;
+                if (map[row] && map[row][col] === 0) {
+                    map[row][col] = 2; // Desaparecer paleta
+                    score += 10;
+                    scoreElement.innerText = score;
+                }
+            }
+
+            // Movimiento e inteligencia de los 5 fantasmas sincronizados
             ghosts.forEach(g => {
-                let nextGX = g.x + g.dx;
-                let nextGY = g.y + g.dy;
-
-                if (!canMove(nextGX, nextGY, g.size)) {
-                    // Si choca contra una pared verde, elige una nueva dirección al azar
-                    const dirs = [
-                        {dx: g.speed, dy: 0},
-                        {dx: -g.speed, dy: 0},
-                        {dx: 0, dy: g.speed},
-                        {dx: 0, dy: -g.speed}
-                    ];
-                    const randomDir = dirs[Math.floor(Math.random() * dirs.length)];
-                    g.dx = randomDir.dx;
-                    g.dy = randomDir.dy;
-                } else {
-                    g.x = nextGX;
-                    g.y = nextGY;
+                if (g.x % tileSize === 0 && g.y % tileSize === 0) {
+                    if (isColliding(g.x + g.dx * tileSize, g.y + g.dy * tileSize) || Math.random() < 0.2) {
+                        const dirs = [
+                            {dx: 1, dy: 0}, {dx: -1, dy: 0},
+                            {dx: 0, dy: 1}, {dx: 0, dy: -1}
+                        ];
+                        // Filtrar solo caminos válidos donde no haya muros verdes
+                        const validDirs = dirs.filter(d => !isColliding(g.x + d.dx * tileSize, g.y + d.dy * tileSize));
+                        if (validDirs.length > 0) {
+                            const choice = validDirs[Math.floor(Math.random() * validDirs.length)];
+                            g.dx = choice.dx;
+                            g.dy = choice.dy;
+                        }
+                    }
                 }
 
+                g.x += g.dx * g.speed;
+                g.y += g.dy * g.speed;
+
                 // Colisión letal
-                const dist = Math.hypot(pacman.x - g.x, pacman.y - g.y);
-                if (dist < pacman.size + g.size) {
-                    alert("GAME OVER - Sabor Derretido. Puntos: " + score);
+                const dist = Math.hypot((pacman.x + tileSize/2) - (g.x + tileSize/2), (pacman.y + tileSize/2) - (g.y + tileSize/2));
+                if (dist < tileSize * 0.7) {
+                    alert("GAME OVER - ¡Te atraparon! Sabor Final: " + score);
                     document.location.reload();
                 }
             });
@@ -371,24 +404,24 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // CAPTURA DE TECLAS CORREGIDA (Evita mover la página web hacia arriba/abajo)
+        // CAPTURA DE ENTRADAS CON BUFFER DE MEMORIA
         window.addEventListener("keydown", (e) => {
             if(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
-                e.preventDefault(); // <-- ¡Aquí ocurre la magia preventiva!
+                e.preventDefault(); 
             }
 
             switch(e.key) {
                 case "ArrowUp":
-                    pacman.dx = 0; pacman.dy = -pacman.speed; pacman.direction = 'up';
+                    pacman.requestedDx = 0; pacman.requestedDy = -1;
                     break;
                 case "ArrowDown":
-                    pacman.dx = 0; pacman.dy = pacman.speed; pacman.direction = 'down';
+                    pacman.requestedDx = 0; pacman.requestedDy = 1;
                     break;
                 case "ArrowLeft":
-                    pacman.dx = -pacman.speed; pacman.dy = 0; pacman.direction = 'left';
+                    pacman.requestedDx = -1; pacman.requestedDy = 0;
                     break;
                 case "ArrowRight":
-                    pacman.dx = pacman.speed; pacman.dy = 0; pacman.direction = 'right';
+                    pacman.requestedDx = 1; pacman.requestedDy = 0;
                     break;
             }
         });
