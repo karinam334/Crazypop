@@ -3,39 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crazy Pop - Lobby</title>
+    <title>Crazy Pop - Arcade Lobby</title>
     <style>
-        /* --- ESTILOS GLOBALES Y PALETA DE COLORES --- */
+        /* --- ESTILOS GLOBALES Y FONDO RETRO ARCADE --- */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Courier New', Courier, monospace, sans-serif; /* Tipografía más arcade/pixel */
         }
 
         body {
-            background-color: #121212; /* Fondo oscuro profundo */
+            /* Fondo oscuro con cuadrícula de neón estilo laberinto de Pac-Man */
+            background-color: #080810; 
+            background-image: 
+                linear-gradient(rgba(18, 16, 32, 0.85) 0%, rgba(18, 16, 32, 0.85) 100%),
+                linear-gradient(90deg, rgba(33, 150, 243, 0.15) 1px, transparent 1px),
+                linear-gradient(rgba(33, 150, 243, 0.15) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
             color: #ffffff;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Efecto de líneas de TV antigua (CRT Scanlines) */
+        body::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 32, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 9999;
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
         }
 
         /* --- ANIMACIONES --- */
-        /* Animación de entrada flotante para la tarjeta */
         @keyframes floatUp {
-            0% {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
 
-        /* Parpadeo neón para el logotipo y títulos */
         @keyframes neonFlicker {
             0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
                 text-shadow: 0 0 8px #ff007f, 0 0 15px #ff007f, 0 0 30px #ff007f;
@@ -45,22 +56,15 @@
             }
         }
 
-        /* Efecto flotante suave para elementos gráficos */
-        @keyframes gentleFloat {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
-            100% { transform: translateY(0px); }
-        }
-
         /* --- MENÚ DE NAVEGACIÓN SUPERIOR --- */
         header {
-            background-color: #050505;
-            padding: 12px 20px;
-            border-bottom: 3px solid #39ff14; /* Línea verde neón */
+            background-color: #000000;
+            padding: 15px 20px;
+            border-bottom: 4px solid #00ffff; /* Azul cian estilo arcade */
             position: sticky;
             top: 0;
             z-index: 1000;
-            box-shadow: 0 4px 20px rgba(57, 255, 20, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 255, 255, 0.3);
         }
 
         nav {
@@ -71,27 +75,13 @@
             margin: 0 auto;
         }
 
-        /* Contenedor del Logo de la Empresa */
-        .brand-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .brand-logo {
-            width: 45px;
-            height: 45px;
-            object-fit: contain;
-            filter: drop-shadow(0 0 8px #ff007f); /* Brillo para la imagen */
-            animation: gentleFloat 4s ease-in-out infinite;
-        }
-
+        /* Texto de la marca limpio y con parpadeo */
         .logo-text {
-            font-size: 1.7rem;
+            font-size: 2rem;
             font-weight: 900;
             color: #ff007f; /* Rosa fosforescente */
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             animation: neonFlicker 6s infinite alternate;
         }
 
@@ -104,21 +94,21 @@
         .nav-links a {
             text-decoration: none;
             color: #39ff14; /* Verde neón */
-            font-weight: 600;
+            font-weight: bold;
             padding: 8px 16px;
-            border-radius: 5px;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: 2px solid transparent;
+            transition: all 0.2s ease-in-out;
             text-transform: uppercase;
-            font-size: 0.9rem;
-            display: inline-block;
+            font-size: 0.95rem;
         }
 
-        /* Efecto al pasar el cursor sobre los enlaces */
+        /* Efecto de selección estilo menú de juego retro */
         .nav-links a:hover, .nav-links a.active {
-            background-color: #39ff14;
-            color: #000000;
-            box-shadow: 0 0 20px #39ff14;
-            transform: scale(1.05) translateY(-2px);
+            border-color: #39ff14;
+            background-color: rgba(57, 255, 20, 0.1);
+            color: #39ff14;
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
+            transform: scale(1.05);
         }
 
         /* --- CONTENIDO PRINCIPAL --- */
@@ -133,87 +123,75 @@
             width: 100%;
         }
 
-        /* Tarjeta contenedora con animación de entrada */
+        /* Tarjeta con bordes dobles simulando pantalla de Arcade */
         .welcome-card {
-            background-color: #1a1a1a;
-            border: 4px solid #ff007f;
-            border-radius: 24px;
+            background-color: #000000;
+            border: 4px dashed #00ffff; /* Bordes discontinuos tipo retro */
+            outline: 4px solid #ff007f; /* Doble borde neón */
+            border-radius: 4px; /* Menos redondeado, más pixel */
             padding: 50px 40px;
             text-align: center;
-            box-shadow: 0 0 30px rgba(255, 0, 127, 0.3);
+            box-shadow: 0 0 35px rgba(0, 255, 255, 0.2), inset 0 0 20px rgba(255, 0, 127, 0.2);
             max-width: 650px;
             width: 100%;
-            position: relative;
-            overflow: hidden;
-            animation: floatUp 0.8s ease-out forwards;
-        }
-
-        /* Decoración de esquina fosforescente parpadeante */
-        .welcome-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 45px;
-            height: 45px;
-            background-color: #ccff00; /* Amarillo/Verde limón */
-            box-shadow: 0 0 18px #ccff00;
-            clip-path: polygon(0 0, 100% 0, 0 100%);
+            animation: floatUp 0.6s ease-out forwards;
         }
 
         h1 {
-            color: #ccff00; /* Amarillo limón fosforito */
-            font-size: 3rem;
-            margin-bottom: 20px;
+            color: #ccff00; /* Amarillo limón */
+            font-size: 3.2rem;
+            margin-bottom: 25px;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            text-shadow: 0 0 12px rgba(204, 255, 0, 0.5);
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #ccff00;
         }
 
         p {
             color: #ffffff;
-            font-size: 1.15rem;
-            line-height: 1.7;
-            margin-bottom: 35px;
-        }
-
-        .highlight-text {
-            color: #39ff14;
-            font-weight: bold;
-            text-shadow: 0 0 5px rgba(57, 255, 20, 0.3);
-        }
-
-        /* Botón de acción animado */
-        .btn-neon {
-            display: inline-block;
-            padding: 14px 35px;
-            background-color: transparent;
-            color: #ff007f;
-            border: 3px solid #ff007f;
-            text-decoration: none;
-            font-weight: bold;
-            text-transform: uppercase;
-            border-radius: 50px;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(255, 0, 127, 0.2);
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 40px;
             letter-spacing: 1px;
         }
 
-        .btn-neon:hover {
+        .highlight-text {
+            color: #00ffff;
+            font-weight: bold;
+            text-shadow: 0 0 8px #00ffff;
+        }
+
+        /* Botón estilo "INSERT COIN / START" */
+        .btn-neon {
+            display: inline-block;
+            padding: 15px 40px;
             background-color: #ff007f;
             color: #ffffff;
+            border: 3px solid #ffffff;
+            text-decoration: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 1.1rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 15px #ff007f;
+            letter-spacing: 2px;
+        }
+
+        .btn-neon:hover {
+            background-color: transparent;
+            color: #ff007f;
+            border-color: #ff007f;
             box-shadow: 0 0 25px #ff007f;
-            transform: scale(1.08);
+            transform: scale(1.1);
         }
 
         /* --- PIE DE PÁGINA --- */
         footer {
-            background-color: #050505;
+            background-color: #000000;
             text-align: center;
             padding: 20px;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: #555555;
-            border-top: 1px solid #1a1a1a;
+            border-top: 4px solid #ff007f;
         }
     </style>
 </head>
@@ -221,10 +199,7 @@
 
     <header>
         <nav>
-            <div class="brand-container">
-                <img src="logo.png" alt="Logo Crazy Pop" class="brand-logo">
-                <span class="logo-text">Crazy Pop</span>
-            </div>
+            <div class="logo-text">Crazy Pop</div>
             
             <ul class="nav-links">
                 <li><a href="index.html" class="active">Lobby</a></li>
@@ -239,14 +214,14 @@
 
     <main>
         <div class="welcome-card">
-            <h1>¡Bienvenidos!</h1>
-            <p>Estás en el lobby oficial de <span class="highlight-text">Crazy Pop</span>. Prepárate para una explosión de sabor bajo cero con el estilo más vivo y fosforescente de la web.</p>
-            <a href="1.html" class="btn-neon">Ver Catálogo</a>
+            <h1>INSERT COIN</h1>
+            <p>Estás en el lobby arcade de <span class="highlight-text">Crazy Pop</span>. Prepárate para una experiencia pixelada bajo cero llena de acción y sabor retro.</p>
+            <a href="1.html" class="btn-neon">PLAY GAME</a>
         </div>
     </main>
 
     <footer>
-        <p>&copy; 2026 Crazy Pop - Todos los derechos reservados.</p>
+        <p>&copy; 2026 Crazy Pop Arcade - Todos los derechos reservados.</p>
     </footer>
 
 </body>
