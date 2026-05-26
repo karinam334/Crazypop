@@ -97,7 +97,7 @@
             border-radius: 4px;
             box-shadow: 0 0 45px rgba(255, 0, 127, 0.35);
             text-align: center;
-            max-width: 710px; /* Ancho ideal para la nueva escala de 22x22 */
+            max-width: 710px;
             width: 100%;
             position: relative;
         }
@@ -113,7 +113,6 @@
             text-transform: uppercase;
         }
 
-        /* Contenedor del canvas para poder encimar la pantalla de victoria */
         .canvas-wrapper {
             position: relative;
             margin: 0 auto;
@@ -128,50 +127,73 @@
             box-shadow: 0 0 20px rgba(255, 0, 127, 0.2);
         }
 
-        /* --- PANTALLA DE VICTORIA (ANIMACIÓN) --- */
-        .victory-screen {
-            display: none; /* Oculta por defecto */
+        /* --- INTERFACES RETRO (VICTORIA Y DERROTA) --- */
+        .game-overlay {
+            display: none; 
             position: absolute;
             top: 4px; left: 4px; right: 4px; bottom: 4px;
-            background-color: rgba(0, 0, 0, 0.9);
+            background-color: rgba(0, 0, 0, 0.95);
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 10;
-            animation: fadeIn 0.5s ease forwards;
+            animation: fadeIn 0.4s ease forwards;
         }
 
-        .victory-screen img {
-            max-width: 220px;
+        .game-overlay img {
+            max-width: 200px;
             height: auto;
             margin-bottom: 20px;
             animation: bounce 2s infinite ease-in-out;
         }
 
-        .victory-screen h2 {
-            color: #39ff14;
+        .game-overlay h2 {
             font-size: 2.5rem;
             letter-spacing: 2px;
-            text-shadow: 0 0 15px #39ff14;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             text-transform: uppercase;
         }
 
-        .victory-screen p {
+        .text-win {
+            color: #39ff14;
+            text-shadow: 0 0 15px #39ff14;
+        }
+
+        .text-lose {
+            color: #ff007f;
+            text-shadow: 0 0 15px #ff007f;
+        }
+
+        .game-overlay p {
             color: #ffffff;
             font-size: 1.1rem;
             letter-spacing: 1px;
+            margin-bottom: 25px;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        /* Botón Arcade reactivo */
+        .btn-retry {
+            padding: 12px 30px;
+            background-color: transparent;
+            color: #39ff14;
+            border: 3px solid #39ff14;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+            transition: all 0.2s ease;
         }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
+        .btn-retry:hover {
+            background-color: #39ff14;
+            color: #000000;
+            box-shadow: 0 0 20px #39ff14;
+            transform: scale(1.05);
         }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
 
         .controls-info {
             margin-top: 15px;
@@ -181,18 +203,8 @@
             letter-spacing: 1px;
         }
 
-        .controls-info span {
-            color: #ff007f;
-        }
-
-        footer {
-            background-color: #000000;
-            text-align: center;
-            padding: 15px;
-            font-size: 0.9rem;
-            color: #444444;
-            border-top: 4px solid #ff007f;
-        }
+        .controls-info span { color: #ff007f; }
+        footer { background-color: #000000; text-align: center; padding: 15px; font-size: 0.9rem; color: #444444; border-top: 4px solid #ff007f; }
     </style>
 </head>
 <body>
@@ -215,21 +227,28 @@
         <div class="arcade-container">
             <div class="score-board">
                 <span>SCORE: <span id="score">0000</span></span>
-                <span>LIVES: <span>💖💖💖</span></span>
+                <span>LIVES: <span id="livesContainer">💖💖💖</span></span>
             </div>
             
             <div class="canvas-wrapper">
                 <canvas id="gameCanvas" width="660" height="660"></canvas>
                 
-                <div class="victory-screen" id="victoryScreen">
+                <div class="game-overlay" id="victoryScreen">
                     <img src="panso.png" alt="Rana Pansa">
-                    <h2>¡FELICIDADES GANASTE!</h2>
+                    <h2 class="text-win">¡FELICIDADES GANASTE!</h2>
                     <p>Te comiste todas las paletas de Crazy Pop</p>
+                    <button class="btn-retry" onclick="resetGame()">Jugar de nuevo</button>
+                </div>
+
+                <div class="game-overlay" id="gameOverScreen">
+                    <h2 class="text-lose">GAME OVER</h2>
+                    <p>La ranita se quedó sin energías...</p>
+                    <button class="btn-retry" onclick="resetGame()">Reintentar</button>
                 </div>
             </div>
             
             <div class="controls-info">
-                RANITA ARCADE: Usa las <span>FLECHAS DEL TECLADO</span>
+                ¡Las paletas raras te dan <span>SÚPER PODER VERDE</span> para comer fantasmas!
             </div>
         </div>
     </main>
@@ -242,55 +261,44 @@
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         const scoreElement = document.getElementById("score");
+        const livesContainer = document.getElementById("livesContainer");
         const victoryScreen = document.getElementById("victoryScreen");
+        const gameOverScreen = document.getElementById("gameOverScreen");
 
         const tileSize = 30; 
         let score = 0;
-        let totalItems = 0; // Contador dinámico de coleccionables
-        let isGameWon = false;
+        let lives = 3;
+        let totalItems = 0; 
+        let isGameOver = false;
 
         // --- CARGA DE IMÁGENES ---
-        const imgOpen = new Image();
-        imgOpen.src = 'open.png';
+        const imgOpen = new Image(); imgOpen.src = 'open.png';
+        const imgClose = new Image(); imgClose.src = 'close.png';
+        const imgPale = new Image(); imgPale.src = 'pale.png';
+        const imgPale2 = new Image(); imgPale2.src = 'pale2.png';
 
-        const imgClose = new Image();
-        imgClose.src = 'close.png';
-
-        const imgPale = new Image();
-        imgPale.src = 'pale.png';
-
-        const imgPale2 = new Image();
-        imgPale2.src = 'pale2.png';
-
-        // Ranita con alineación de rejilla optimizada
+        // Estructura de la Ranita
         const pacman = {
-            x: 30, 
-            y: 30,
-            speed: 3, 
-            dx: 0,
-            dy: 0,
-            requestedDx: 0, 
-            requestedDy: 0,
-            animationTimer: 0,
-            useOpenSprite: true,
-            direction: 'right'
+            x: 30, y: 30, speed: 3,
+            dx: 0, dy: 0,
+            requestedDx: 0, requestedDy: 0,
+            animationTimer: 0, useOpenSprite: true,
+            direction: 'right',
+            superMode: false,
+            superTimer: 0
         };
 
-        // Escuadrón aumentado de 5 fantasmas veloces
+        // Escuadrón de fantasmas con posiciones de reinicio (Spawn de vuelta)
         const ghosts = [
-            { x: 300, y: 300, dx: 3,  dy: 0,  speed: 3 },
-            { x: 330, y: 300, dx: -3, dy: 0,  speed: 3 },
-            { x: 300, y: 330, dx: 0,  dy: -3, speed: 3 },
-            { x: 330, y: 330, dx: 0,  dy: 3,  speed: 3 },
-            { x: 600, y: 600, dx: -3, dy: 0,  speed: 3 }
+            { x: 300, y: 300, startX: 300, startY: 300, dx: 3, dy: 0, speed: 3, isDead: false, respawnTimer: 0 },
+            { x: 330, y: 300, startX: 330, startY: 300, dx: -3, dy: 0, speed: 3, isDead: false, respawnTimer: 0 },
+            { x: 300, y: 330, startX: 300, startY: 330, dx: 0, dy: -3, speed: 3, isDead: false, respawnTimer: 0 },
+            { x: 330, y: 330, startX: 330, startY: 330, dx: 0, dy: 3, speed: 3, isDead: false, respawnTimer: 0 },
+            { x: 600, y: 600, startX: 600, startY: 600, dx: -3, dy: 0, speed: 3, isDead: false, respawnTimer: 0 }
         ];
 
-        /* MAPA GIGANTE OSCURO (22 filas x 22 columnas)
-           1 = Muro Oscuro
-           0 = Espacio con item (Se decide dinámicamente si es pale, pale2 o círculo en el inicio)
-           2 = Vacío (Cajas de aparición de fantasmas y spawn)
-        */
-        const map = [
+        // MAPA GIGANTE OSCURO (22x22)
+        const baseMap = [
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
             [1,2,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1],
             [1,0,1,1,0,1,1,1,1,0,1,1,0,1,1,1,1,0,1,1,0,1],
@@ -315,48 +323,68 @@
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ];
 
-        /* Matriz secundaria para clasificar el tipo de punto de forma balanceada:
-           'p1' = pale.png, 'p2' = pale2.png, 'c' = círculo clásico (sin sprite)
-        */
-        const itemTypeMap = [];
+        let map = [];
+        let itemTypeMap = [];
 
-        function initItems() {
+        function initGameData() {
+            score = 0;
+            lives = 3;
+            totalItems = 0;
+            isGameOver = false;
+            scoreElement.innerText = "0000";
+            livesContainer.innerText = "💖💖💖";
+            victoryScreen.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+
+            pacman.x = 30; pacman.y = 30;
+            pacman.dx = 0; pacman.dy = 0;
+            pacman.requestedDx = 0; pacman.requestedDy = 0;
+            pacman.superMode = false; pacman.superTimer = 0;
+
+            map = JSON.parse(JSON.stringify(baseMap));
+            itemTypeMap = [];
+
             for (let r = 0; r < map.length; r++) {
                 itemTypeMap[r] = [];
                 for (let c = 0; c < map[r].length; c++) {
                     if (map[r][c] === 0) {
-                        totalItems++; // Contamos el punto para la condición de ganar
+                        totalItems++; 
                         let rand = Math.random();
-                        if (rand < 0.25) {
-                            itemTypeMap[r][c] = 'p1'; // 25% de probabilidad pale.png
-                        } else if (rand < 0.50) {
-                            itemTypeMap[r][c] = 'p2'; // 25% de probabilidad pale2.png
+                        // Reducimos las probabilidades notablemente para no saturar el mapa
+                        if (rand < 0.08) { 
+                            itemTypeMap[r][c] = 'p1'; // 8% pale.png
+                        } else if (rand < 0.14) { 
+                            itemTypeMap[r][c] = 'p2'; // 6% pale2.png (Poder Especial)
                         } else {
-                            itemTypeMap[r][c] = 'c';  // 50% de círculos tradicionales para no saturar
+                            itemTypeMap[r][c] = 'c';  // El resto son puntos limpios sin sprite
                         }
                     }
                 }
             }
+
+            ghosts.forEach(g => {
+                g.x = g.startX; g.y = g.startY;
+                g.isDead = false; g.respawnTimer = 0;
+                g.dx = Math.random() > 0.5 ? 3 : -3;
+                g.dy = 0;
+            });
         }
 
         function drawMap() {
             for (let r = 0; r < map.length; r++) {
                 for (let c = 0; c < map[r].length; c++) {
                     if (map[r][c] === 1) {
-                        // MUROS OSCUROS: Color elegante para que resalten los fosforescentes
                         ctx.fillStyle = "#121218"; 
                         ctx.fillRect(c * tileSize, r * tileSize, tileSize, tileSize);
                         ctx.strokeStyle = "#050508";
                         ctx.strokeRect(c * tileSize, r * tileSize, tileSize, tileSize);
                     } else if (map[r][c] === 0) {
                         let type = itemTypeMap[r][c];
-
                         if (type === 'p1' && imgPale.complete && imgPale.width > 0) {
                             ctx.drawImage(imgPale, c * tileSize + 4, r * tileSize + 4, tileSize - 8, tileSize - 8);
                         } else if (type === 'p2' && imgPale2.complete && imgPale2.width > 0) {
                             ctx.drawImage(imgPale2, c * tileSize + 4, r * tileSize + 4, tileSize - 8, tileSize - 8);
                         } else {
-                            // Círculo tradicional rosa neón sin sprite
                             ctx.beginPath();
                             ctx.arc(c * tileSize + tileSize/2, r * tileSize + tileSize/2, 4, 0, Math.PI * 2);
                             ctx.fillStyle = "#ff007f";
@@ -376,6 +404,12 @@
             if (pacman.direction === 'up') ctx.rotate(-Math.PI / 2);
             if (pacman.direction === 'down') ctx.rotate(Math.PI / 2);
 
+            // EFECTO DE BRILLO VERDE FOSFORESCENTE (Si está en súper modo)
+            if (pacman.superMode) {
+                ctx.shadowBlur = 18;
+                ctx.shadowColor = "#39ff14";
+            }
+
             let currentImg = pacman.useOpenSprite ? imgOpen : imgClose;
 
             if (currentImg.complete && currentImg.width > 0) {
@@ -384,23 +418,28 @@
                 ctx.beginPath();
                 ctx.arc(0, 0, tileSize/2.5, 0.2 * Math.PI, 1.8 * Math.PI);
                 ctx.lineTo(0, 0);
-                ctx.fillStyle = "#ff007f";
+                ctx.fillStyle = pacman.superMode ? "#39ff14" : "#ff007f";
                 ctx.fill();
                 ctx.closePath();
             }
             ctx.restore();
+            ctx.shadowBlur = 0; // Resetear sombra
         }
 
         function drawGhosts() {
             ghosts.forEach(g => {
+                if (g.isDead) return; // No dibujar si está en cola de reaparición
+
                 ctx.beginPath();
                 ctx.arc(g.x + tileSize/2, g.y + tileSize/2, tileSize/2.5, Math.PI, 0, false);
                 ctx.lineTo(g.x + tileSize/2 + tileSize/2.5, g.y + tileSize/2 + tileSize/2.5);
                 ctx.lineTo(g.x + tileSize/2 - tileSize/2.5, g.y + tileSize/2 + tileSize/2.5);
-                ctx.fillStyle = "#39ff14"; // Fantasmas Verde Fosfo
+                
+                // Si la rana tiene poder, los fantasmas se vuelven rosa opaco/vulnerables
+                ctx.fillStyle = pacman.superMode ? "#ff007f" : "#39ff14"; 
                 ctx.fill();
                 ctx.shadowBlur = 8;
-                ctx.shadowColor = "#39ff14";
+                ctx.shadowColor = ctx.fillStyle;
                 ctx.closePath();
                 ctx.shadowBlur = 0;
             });
@@ -417,9 +456,17 @@
         }
 
         function update() {
-            if (isGameWon) return; // Parar cálculos si ya ganó
+            if (isGameOver) return;
 
-            // Sistema de movimiento de precisión fija
+            // Manejo del temporizador del Súper Poder de la rana
+            if (pacman.superMode) {
+                pacman.superTimer--;
+                if (pacman.superTimer <= 0) {
+                    pacman.superMode = false;
+                }
+            }
+
+            // Movimiento de la ranita
             if (pacman.x % tileSize === 0 && pacman.y % tileSize === 0) {
                 if (!isColliding(pacman.x + pacman.requestedDx * tileSize, pacman.y + pacman.requestedDy * tileSize)) {
                     pacman.dx = pacman.requestedDx;
@@ -429,17 +476,14 @@
                     if(pacman.dy > 0) pacman.direction = 'down';
                     if(pacman.dy < 0) pacman.direction = 'up';
                 }
-                
                 if (isColliding(pacman.x + pacman.dx * tileSize, pacman.y + pacman.dy * tileSize)) {
-                    pacman.dx = 0;
-                    pacman.dy = 0;
+                    pacman.dx = 0; pacman.dy = 0;
                 }
             }
 
             pacman.x += pacman.dx * pacman.speed;
             pacman.y += pacman.dy * pacman.speed;
 
-            // Transición de la boca al caminar
             if (pacman.dx !== 0 || pacman.dy !== 0) {
                 pacman.animationTimer++;
                 if (pacman.animationTimer > 8) {
@@ -448,37 +492,50 @@
                 }
             }
 
-            // Comer elementos del mapa
+            // Comer ítems
             if (pacman.x % tileSize === 0 && pacman.y % tileSize === 0) {
                 const col = pacman.x / tileSize;
                 const row = pacman.y / tileSize;
                 if (map[row] && map[row][col] === 0) {
+                    let consumedType = itemTypeMap[row][col];
                     map[row][col] = 2; 
                     score += 10;
-                    totalItems--; // Restamos del contador de victoria
+                    totalItems--;
                     scoreElement.innerText = score.toString().padStart(4, '0');
 
-                    // DETECTAR VICTORIA
+                    // ACTIVAR MODO SUPER al comer pale2.png
+                    if (consumedType === 'p2') {
+                        pacman.superMode = true;
+                        pacman.superTimer = 420; // 7 segundos aproximados a 60fps
+                    }
+
                     if (totalItems <= 0) {
-                        isGameWon = true;
-                        victoryScreen.style.display = 'flex'; // Despliega la animación de la pansa
+                        isGameOver = true;
+                        victoryScreen.style.display = 'flex';
                     }
                 }
             }
 
-            // Patrullaje de Fantasmas
+            // Lógica y Reaparición de Fantasmas
             ghosts.forEach(g => {
+                if (g.isDead) {
+                    g.respawnTimer--;
+                    if (g.respawnTimer <= 0) {
+                        g.isDead = false;
+                        g.x = g.startX; g.y = g.startY; // Regresa al centro
+                    }
+                    return; 
+                }
+
                 if (g.x % tileSize === 0 && g.y % tileSize === 0) {
                     if (isColliding(g.x + g.dx * tileSize, g.y + g.dy * tileSize) || Math.random() < 0.15) {
                         const dirs = [
-                            {dx: 1, dy: 0}, {dx: -1, dy: 0},
-                            {dx: 0, dy: 1}, {dx: 0, dy: -1}
+                            {dx: 1, dy: 0}, {dx: -1, dy: 0}, {dx: 0, dy: 1}, {dx: 0, dy: -1}
                         ];
                         const validDirs = dirs.filter(d => !isColliding(g.x + d.dx * tileSize, g.y + d.dy * tileSize));
                         if (validDirs.length > 0) {
                             const choice = validDirs[Math.floor(Math.random() * validDirs.length)];
-                            g.dx = choice.dx;
-                            g.dy = choice.dy;
+                            g.dx = choice.dx; g.dy = choice.dy;
                         }
                     }
                 }
@@ -486,11 +543,29 @@
                 g.x += g.dx * g.speed;
                 g.y += g.dy * g.speed;
 
-                // Colisión letal
+                // Sistema de Colisiones Dinámico
                 const dist = Math.hypot((pacman.x + tileSize/2) - (g.x + tileSize/2), (pacman.y + tileSize/2) - (g.y + tileSize/2));
                 if (dist < tileSize * 0.65) {
-                    alert("GAME OVER - ¡Te derritieron! Marcador: " + score);
-                    document.location.reload();
+                    if (pacman.superMode) {
+                        // LA RANA SE COME AL FANTASMA
+                        g.isDead = true;
+                        g.respawnTimer = 240; // 4 segundos en revivir
+                        score += 100; // Bonus por cazar enemigos
+                        scoreElement.innerText = score.toString().padStart(4, '0');
+                    } else {
+                        // EL FANTASMA MATA A LA RANA
+                        lives--;
+                        livesContainer.innerText = "💖".repeat(lives);
+                        if (lives <= 0) {
+                            isGameOver = true;
+                            gameOverScreen.style.display = 'flex';
+                        } else {
+                            // Reinicio de posiciones tras perder una vida
+                            pacman.x = 30; pacman.y = 30;
+                            pacman.dx = 0; pacman.dy = 0;
+                            pacman.requestedDx = 0; pacman.requestedDy = 0;
+                        }
+                    }
                 }
             });
         }
@@ -504,32 +579,26 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // CONTROL DE FLECHAS CON BUFFER
+        function resetGame() {
+            initGameData();
+        }
+
         window.addEventListener("keydown", (e) => {
             if(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
                 e.preventDefault(); 
             }
-
-            if (isGameWon) return; // Desactivar teclas si ya ganó
+            if (isGameOver) return;
 
             switch(e.key) {
-                case "ArrowUp":
-                    pacman.requestedDx = 0; pacman.requestedDy = -1;
-                    break;
-                case "ArrowDown":
-                    pacman.requestedDx = 0; pacman.requestedDy = 1;
-                    break;
-                case "ArrowLeft":
-                    pacman.requestedDx = -1; pacman.requestedDy = 0;
-                    break;
-                case "ArrowRight":
-                    pacman.requestedDx = 1; pacman.requestedDy = 0;
-                    break;
+                case "ArrowUp":    pacman.requestedDx = 0;  pacman.requestedDy = -1; break;
+                case "ArrowDown":  pacman.requestedDx = 0;  pacman.requestedDy = 1;  break;
+                case "ArrowLeft":  pacman.requestedDx = -1; pacman.requestedDy = 0;  break;
+                case "ArrowRight": pacman.requestedDx = 1;  pacman.requestedDy = 0;  break;
             }
         });
 
-        // Inicializar conteo e iniciar ciclo principal
-        initItems();
+        // Inicio automático del sistema
+        initGameData();
         gameLoop();
     </script>
 </body>
