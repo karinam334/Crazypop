@@ -79,52 +79,51 @@
             box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
         }
 
-        /* --- ZONA DEL JUEGO (RETRO CABINET) --- */
+        /* --- RETRO CABINET (MÁS GRANDE Y CENTRADO) --- */
         main {
             flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 30px 20px;
+            padding: 20px;
         }
 
         .arcade-container {
             background-color: #000000;
             border: 4px dashed #39ff14;
             outline: 4px solid #ff007f;
-            padding: 20px;
+            padding: 25px;
             border-radius: 4px;
-            box-shadow: 0 0 35px rgba(255, 0, 127, 0.3);
+            box-shadow: 0 0 45px rgba(255, 0, 127, 0.35);
             text-align: center;
-            max-width: 500px;
+            max-width: 620px; /* Aumentado para contener el mapa grande */
             width: 100%;
         }
 
         .score-board {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             color: #39ff14;
-            font-size: 1.4rem;
+            font-size: 1.6rem;
             font-weight: bold;
             text-shadow: 0 0 5px #39ff14;
             text-transform: uppercase;
         }
 
-        /* El lienzo del juego */
         canvas {
             background-color: #000000;
-            border: 2px solid #ff007f;
+            border: 4px solid #ff007f;
             display: block;
             margin: 0 auto;
-            box-shadow: 0 0 15px rgba(255, 0, 127, 0.2);
+            box-shadow: 0 0 20px rgba(255, 0, 127, 0.2);
         }
 
         .controls-info {
-            margin-top: 15px;
+            margin-top: 20px;
             color: #888888;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -133,7 +132,6 @@
             color: #ff007f;
         }
 
-        /* --- PIE DE PÁGINA --- */
         footer {
             background-color: #000000;
             text-align: center;
@@ -164,10 +162,10 @@
         <div class="arcade-container">
             <div class="score-board">
                 <span>SCORE: <span id="score">00</span></span>
-                <span>LIVES: <span id="lives">💖💖💖</span></span>
+                <span>LIVES: <span>💖💖💖</span></span>
             </div>
             
-            <canvas id="gameCanvas" width="400" height="400"></canvas>
+            <canvas id="gameCanvas" width="560" height="560"></canvas>
             
             <div class="controls-info">
                 Usa las <span>FLECHAS DEL TECLADO</span> para moverte
@@ -187,55 +185,62 @@
         const tileSize = 40; 
         let score = 0;
 
-        // Configuración de nuestro Pac-Man (estilo Bola Rosa)
+        /* --- PREPARACIÓN PARA SPRITESfuturos ---
+           Puedes descomentar estas líneas cuando tengas listos tus archivos de imagen:
+           const pacmanSprite = new Image();
+           pacmanSprite.src = 'pacman-sheet.png'; 
+        */
+        const useSprites = false; // Cambia a true cuando integres las imágenes
+
+        // Jugador con propiedades de animación listas
         const pacman = {
-            x: 40,
-            y: 40,
+            x: 60,
+            y: 60,
             size: 14,
             dx: 0,
             dy: 0,
             speed: 4,
-            angle: 0.2 // Para la animación de la boca
+            spriteFrame: 0, // Para controlar qué frame del sprite usar
+            direction: 'right' // Para rotar el dibujo o el sprite
         };
 
-        // Configuración de un Fantasma Enemigo (Verde Neón)
-        const ghost = {
-            x: 320,
-            y: 320,
-            size: 14,
-            dx: 4,
-            dy: 0,
-            speed: 2
-        };
-
-        // Representación del mapa: 1 = Muro (Verde), 0 = Camino con bolita rosa, 2 = Vacío
-        const map = [
-            [1,1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,1,0,0,0,0,1],
-            [1,0,1,0,1,0,1,1,0,1],
-            [1,0,1,0,0,0,0,1,0,1],
-            [1,0,1,1,1,1,0,1,0,1],
-            [1,0,0,0,0,1,0,0,0,1],
-            [1,1,1,0,0,1,1,1,0,1],
-            [1,0,0,0,0,0,0,1,0,1],
-            [1,0,1,1,0,1,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1,1]
+        // Arreglo de múltiples fantasmas
+        const ghosts = [
+            { x: 260, y: 220, size: 14, dx: 2, dy: 0, speed: 2, spriteFrame: 0 },
+            { x: 300, y: 260, size: 14, dx: -2, dy: 0, speed: 2, spriteFrame: 1 },
+            { x: 60,  y: 500, size: 14, dx: 0, dy: -2, speed: 2, spriteFrame: 2 }
         ];
 
-        // Dibujar el mapa (Muros verdes, Comida rosa)
+        // MAPA AMPLIADO (14 filas x 14 columnas)
+        // 1 = Pared, 0 = Puntos, 2 = Vacío
+        const map = [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,1,1,0,0,0,0,0,1],
+            [1,0,1,1,1,0,1,1,0,1,1,1,0,1],
+            [1,0,1,1,1,0,0,0,0,1,1,1,0,1],
+            [1,0,0,0,0,0,1,1,0,0,0,0,0,1],
+            [1,1,1,0,1,1,1,1,1,1,0,1,1,1],
+            [1,1,1,0,0,0,0,0,0,0,0,1,1,1],
+            [1,1,1,0,1,1,2,2,1,1,0,1,1,1],
+            [1,0,0,0,1,1,2,2,1,1,0,0,0,1],
+            [1,0,1,0,1,1,1,1,1,1,0,1,0,1],
+            [1,0,1,0,0,0,0,0,0,0,0,1,0,1],
+            [1,0,1,1,1,1,0,0,1,1,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ];
+
         function drawMap() {
             for (let r = 0; r < map.length; r++) {
                 for (let c = 0; c < map[r].length; c++) {
                     if (map[r][c] === 1) {
-                        ctx.fillStyle = "#39ff14"; // Muros Verde Neón
+                        ctx.fillStyle = "#39ff14"; 
                         ctx.fillRect(c * tileSize, r * tileSize, tileSize, tileSize);
-                        // Línea interna negra para dar efecto de rejilla arcade
                         ctx.strokeStyle = "#000000";
                         ctx.strokeRect(c * tileSize, r * tileSize, tileSize, tileSize);
                     } else if (map[r][c] === 0) {
-                        // Bolitas de puntos Rosa Fosforescente
                         ctx.beginPath();
-                        ctx.arc(c * tileSize + tileSize/2, r * tileSize + tileSize/2, 4, 0, Math.PI * 2);
+                        ctx.arc(c * tileSize + tileSize/2, r * tileSize + tileSize/2, 5, 0, Math.PI * 2);
                         ctx.fillStyle = "#ff007f";
                         ctx.fill();
                         ctx.closePath();
@@ -244,117 +249,150 @@
             }
         }
 
-        // Dibujar a nuestro personaje (Rosa con ojos negros)
+        // Sistema modular para renderizar el Personaje principal
         function drawPacman() {
-            ctx.beginPath();
-            // Simulación de boca abierta/cerrada básica usando arcos
-            ctx.arc(pacman.x, pacman.y, pacman.size, 0.2 * Math.PI, 1.8 * Math.PI);
-            ctx.lineTo(pacman.x, pacman.y);
-            ctx.fillStyle = "#ff007f"; // Rosa Fosforescente
-            ctx.fill();
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = "#ff007f";
-            ctx.closePath();
-            ctx.shadowBlur = 0; // Resetear sombra para no ralentizar
+            if (useSprites) {
+                // Aquí irá tu lógica de recorte: ctx.drawImage(pacmanSprite, sx, sy, sw, sh, x, y, dw, dh);
+                // Por ahora se calcula un ciclo básico de frames listo para ti:
+                pacman.spriteFrame = (pacman.spriteFrame + 1) % 20; 
+            } else {
+                // Renderizado vectorial actual integrado con rotación según dirección
+                ctx.save();
+                ctx.translate(pacman.x, pacman.y);
+                
+                if (pacman.direction === 'left') ctx.rotate(Math.PI);
+                if (pacman.direction === 'up') ctx.rotate(-Math.PI / 2);
+                if (pacman.direction === 'down') ctx.rotate(Math.PI / 2);
+
+                ctx.beginPath();
+                ctx.arc(0, 0, pacman.size, 0.2 * Math.PI, 1.8 * Math.PI);
+                ctx.lineTo(0, 0);
+                ctx.fillStyle = "#ff007f";
+                ctx.fill();
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = "#ff007f";
+                ctx.closePath();
+                ctx.restore();
+                ctx.shadowBlur = 0;
+            }
         }
 
-        // Dibujar Fantasma Enemigo (Verde que contrasta)
-        function drawGhost() {
-            ctx.beginPath();
-            ctx.arc(ghost.x, ghost.y, ghost.size, Math.PI, 0, false);
-            ctx.lineTo(ghost.x + ghost.size, ghost.y + ghost.size);
-            ctx.lineTo(ghost.x - ghost.size, ghost.y + ghost.size);
-            ctx.fillStyle = "#39ff14"; // Verde Neón
-            ctx.fill();
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = "#39ff14";
-            ctx.closePath();
-            ctx.shadowBlur = 0;
+        // Sistema modular para renderizar los múltiples Fantasmas
+        function drawGhosts() {
+            ghosts.forEach(g => {
+                if (useSprites) {
+                    // Estructura lista para controlar sprites de los enemigos individualmente
+                    g.spriteFrame = (g.spriteFrame + 1) % 30;
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(g.x, g.y, g.size, Math.PI, 0, false);
+                    ctx.lineTo(g.x + g.size, g.y + g.size);
+                    ctx.lineTo(g.x - g.size, g.y + g.size);
+                    ctx.fillStyle = "#39ff14";
+                    ctx.fill();
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = "#39ff14";
+                    ctx.closePath();
+                    ctx.shadowBlur = 0;
+                }
+            });
         }
 
-        // Detectar colisiones con los muros verdes
-        function canMove(x, y) {
-            // Calcular las esquinas del personaje en la matriz del mapa
-            const topRow = Math.floor((y - pacman.size) / tileSize);
-            const botRow = Math.floor((y + pacman.size) / tileSize);
-            const leftCol = Math.floor((x - pacman.size) / tileSize);
-            const rightCol = Math.floor((x + pacman.size) / tileSize);
+        function canMove(x, y, size) {
+            const topRow = Math.floor((y - size) / tileSize);
+            const botRow = Math.floor((y + size) / tileSize);
+            const leftCol = Math.floor((x - size) / tileSize);
+            const rightCol = Math.floor((x + size) / tileSize);
+
+            if (topRow < 0 || botRow >= map.length || leftCol < 0 || rightCol >= map[0].length) return false;
 
             if (map[topRow][leftCol] === 1 || map[topRow][rightCol] === 1 ||
                 map[botRow][leftCol] === 1 || map[botRow][rightCol] === 1) {
-                return false; // Choca con un muro
+                return false;
             }
             return true;
         }
 
-        // Actualizar movimientos y mecánicas del juego
         function update() {
-            // Intento de movimiento de Pacman
+            // Movimiento del jugador
             let nextX = pacman.x + pacman.dx;
             let nextY = pacman.y + pacman.dy;
 
-            if (canMove(nextX, nextY)) {
+            if (canMove(nextX, nextY, pacman.size)) {
                 pacman.x = nextX;
                 pacman.y = nextY;
             }
 
-            // Comer los puntos rosas
+            // Consumir puntos
             const currentGridX = Math.floor(pacman.x / tileSize);
             const currentGridY = Math.floor(pacman.y / tileSize);
-            if (map[currentGridY][currentGridX] === 0) {
-                map[currentGridY][currentGridX] = 2; // Vaciar la casilla
+            if (map[currentGridY] && map[currentGridY][currentGridX] === 0) {
+                map[currentGridY][currentGridX] = 2;
                 score += 10;
                 scoreElement.innerText = score;
             }
 
-            // Inteligencia artificial ultra básica del fantasma (Rebota en muros)
-            let nextGX = ghost.x + ghost.dx;
-            let nextGY = ghost.y + ghost.dy;
-            
-            // Si el fantasma va a chocar, cambia de dirección aleatoria
-            if (nextGX - ghost.size < tileSize || nextGX + ghost.size > canvas.width - tileSize) {
-                ghost.dx *= -1;
-            }
+            // Movimiento inteligente básico para cada uno de los fantasmas
+            ghosts.forEach(g => {
+                let nextGX = g.x + g.dx;
+                let nextGY = g.y + g.dy;
 
-            ghost.x += ghost.dx;
+                if (!canMove(nextGX, nextGY, g.size)) {
+                    // Si choca contra una pared verde, elige una nueva dirección al azar
+                    const dirs = [
+                        {dx: g.speed, dy: 0},
+                        {dx: -g.speed, dy: 0},
+                        {dx: 0, dy: g.speed},
+                        {dx: 0, dy: -g.speed}
+                    ];
+                    const randomDir = dirs[Math.floor(Math.random() * dirs.length)];
+                    g.dx = randomDir.dx;
+                    g.dy = randomDir.dy;
+                } else {
+                    g.x = nextGX;
+                    g.y = nextGY;
+                }
 
-            // Detección de Game Over (Colisión Pacman vs Fantasma)
-            const dist = Math.hypot(pacman.x - ghost.x, pacman.y - ghost.y);
-            if (dist < pacman.size + ghost.size) {
-                alert("GAME OVER - Puntuación: " + score);
-                document.location.reload();
-            }
+                // Colisión letal
+                const dist = Math.hypot(pacman.x - g.x, pacman.y - g.y);
+                if (dist < pacman.size + g.size) {
+                    alert("GAME OVER - Sabor Derretido. Puntos: " + score);
+                    document.location.reload();
+                }
+            });
         }
 
-        // Bucle principal de animación
         function gameLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawMap();
             drawPacman();
-            drawGhost();
+            drawGhosts();
             update();
             requestAnimationFrame(gameLoop);
         }
 
-        // Manejo de controles del teclado
+        // CAPTURA DE TECLAS CORREGIDA (Evita mover la página web hacia arriba/abajo)
         window.addEventListener("keydown", (e) => {
+            if(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+                e.preventDefault(); // <-- ¡Aquí ocurre la magia preventiva!
+            }
+
             switch(e.key) {
                 case "ArrowUp":
-                    pacman.dx = 0; pacman.dy = -pacman.speed;
+                    pacman.dx = 0; pacman.dy = -pacman.speed; pacman.direction = 'up';
                     break;
                 case "ArrowDown":
-                    pacman.dx = 0; pacman.dy = pacman.speed;
+                    pacman.dx = 0; pacman.dy = pacman.speed; pacman.direction = 'down';
                     break;
                 case "ArrowLeft":
-                    pacman.dx = -pacman.speed; pacman.dy = 0;
+                    pacman.dx = -pacman.speed; pacman.dy = 0; pacman.direction = 'left';
                     break;
                 case "ArrowRight":
-                    pacman.dx = pacman.speed; pacman.dy = 0;
+                    pacman.dx = pacman.speed; pacman.dy = 0; pacman.direction = 'right';
                     break;
             }
         });
 
-        // Iniciar el juego automáticamente
         gameLoop();
     </script>
 </body>
