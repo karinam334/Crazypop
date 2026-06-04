@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crazy Pop - Redes Sociales</title>
+    <style>
+        /* --- ESTILOS GLOBALES --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', Courier, monospace, sans-serif;
+        }
+
+        body {
+            background-color: #050508; 
+            background-image: 
+                linear-gradient(rgba(5, 5, 8, 0.9) 0%, rgba(5, 5, 8, 0.9) 100%),
+                linear-gradient(90deg, rgba(255, 0, 127, 0.05) 1px, transparent 1px),
+                linear-gradient(rgba(255, 0, 127, 0.05) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* --- MENÚ DE NAVEGACIÓN SUPERIOR --- */
+        header {
+            background-color: #000000;
+            padding: 15px 20px;
+            border-bottom: 4px solid #39ff14;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(57, 255, 20, 0.25);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo-text {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #ff007f;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 8px #ff007f;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #39ff14;
+            font-weight: bold;
+            padding: 8px 16px;
+            border: 2px solid transparent;
+            transition: all 0.2s ease-in-out;
+            text-transform: uppercase;
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            border-color: #39ff14;
+            background-color: rgba(57, 255, 20, 0.1);
+            color: #39ff14;
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
+        }
+
+        /* --- CONTENIDO PRINCIPAL --- */
+        main {
+            flex: 1;
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 2.8rem;
+            color: #39ff14;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: #ff007f;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 40px;
+            font-weight: bold;
+        }
+
+        /* --- TARJETA DE ESTRATEGIA DE CONTENIDO --- */
+        .strategy-container {
+            background-color: #000000;
+            border: 3px solid #ff007f;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 40px;
+            text-align: left;
+            box-shadow: 0 5px 15px rgba(255, 0, 127, 0.15);
+        }
+
+        .strategy-container h2 {
+            font-size: 1.4rem;
+            color: #39ff14;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px rgba(57, 255, 20, 0.3);
+        }
+
+        .strategy-container p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+
+        /* --- BOTONES DE REDES SOCIALES ESTILO ARCADE --- */
+        .social-buttons-grid {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background-color: #000000;
+            border: 3px solid #ffffff;
+            padding: 15px 30px;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-tiktok {
+            border-color: #00f2fe;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+        }
+
+        .btn-tiktok:hover {
+            background-color: #00f2fe;
+            color: #000000;
+            box-shadow: 0 0 20px #00f2fe;
+            transform: translateY(-3px);
+        }
+
+        .btn-instagram {
+            border-color: #ff007f;
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.2);
+        }
+
+        .btn-instagram:hover {
+            background-color: #ff007f;
+            color: #ffffff;
+            box-shadow: 0 0 20px #ff007f;
+            transform: translateY(-3px);
+        }
+
+        /* --- CONTENEDOR DE LA IMAGEN DE ESTRATEGIA --- */
+        .media-photo-container {
+            background-color: #000000;
+            border: 4px solid #39ff14;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(57, 255, 20, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .media-photo-container h2 {
+            font-size: 1.4rem;
+            color: #ff007f;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px rgba(255, 0, 127, 0.3);
+        }
+
+        .image-wrapper {
+            width: 100%;
+            max-width: 900px;
+            background-color: #121218;
+            border: 2px dashed #39ff14;
+            border-radius: 8px;
+            padding: 5px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            height: auto;
+            max-height: 550px;
+            object-fit: contain;
+            border-radius: 4px;
+            display: block;
+        }
+
+        footer { 
+            background-color: #000000; 
+            text-align: center; 
+            padding: 15px; 
+            font-size: 0.9rem; 
+            color: #444444; 
+            border-top: 4px solid #ff007f; 
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MENÚ SUPERIOR -->
+    <header>
+        <nav>
+            <div class="logo-text">Crazy Pop</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Lobby</a></li>
+                <li><a href="1.html">Sección 1</a></li>
+                <li><a href="2.html">Sección 2</a></li>
+                <li><a href="3.html">Sección 3</a></li>
+                <li><a href="4.html">Sección 4</a></li>
+                <li><a href="5.html" class="active">Sección 5</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- CUERPO DE LA SECCIÓN -->
+    <main>
+        <h1 class="section-title">Estrategia de Comunicación</h1>
+        <p class="section-subtitle">¡Sintoniza nuestras dinámicas y contenido exclusivo!</p>
+
+        <!-- Contenido y Enfoque según la imagen -->
+        <div class="strategy-container">
+            <h2>Contenido Planificado:</h2>
+            <p>
+                Nuestra propuesta se centra en la publicación de videos cortos <strong>"satisfactorios"</strong> detallando el proceso de preparación artesanal de las paletas, la captura de fotografías estéticas y apetecibles de las manzanas con chamoy, junto con la publicación constante de historias interactivas conviviendo y recolectando opiniones de los clientes en el plantel.
+            </p>
+        </div>
+
+        <!-- Botones de Enlace Simulados -->
+        <div class="social-buttons-grid">
+            <a class="social-btn btn-tiktok" href="#">
+                <span>🎵 TikTok</span>
+            </a>
+            <a class="social-btn btn-instagram" href="#">
+                <span>📸 @ccrazy_pop_</span>
+            </a>
+        </div>
+
+        <!-- ESPACIO DE DESPLIEGUE PARA LA IMAGEN DE LA INFOGRAFÍA -->
+        <div class="media-photo-container">
+            <h2>Plan de Medios Digitales</h2>
+            <div class="image-wrapper">
+                <!-- Llamada exacta al archivo solicitado -->
+                <img src="image_3389f6.png" alt="Canales de Comunicación Gráficos de Crazy Pop">
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Crazy Pop Arcade - Todos los derechos reservados.</p>
+    </footer>
+
+</body>
+</html>
