@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crazy Pop - Estructura Organizacional</title>
+    <style>
+        /* --- ESTILOS GLOBALES --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', Courier, monospace, sans-serif;
+        }
+
+        body {
+            background-color: #050508; 
+            background-image: 
+                linear-gradient(rgba(5, 5, 8, 0.9) 0%, rgba(5, 5, 8, 0.9) 100%),
+                linear-gradient(90deg, rgba(255, 0, 127, 0.05) 1px, transparent 1px),
+                linear-gradient(rgba(255, 0, 127, 0.05) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* --- MENÚ DE NAVEGACIÓN SUPERIOR --- */
+        header {
+            background-color: #000000;
+            padding: 15px 20px;
+            border-bottom: 4px solid #39ff14;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(57, 255, 20, 0.25);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo-text {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #ff007f;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 8px #ff007f;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #39ff14;
+            font-weight: bold;
+            padding: 8px 16px;
+            border: 2px solid transparent;
+            transition: all 0.2s ease-in-out;
+            text-transform: uppercase;
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            border-color: #39ff14;
+            background-color: rgba(57, 255, 20, 0.1);
+            color: #39ff14;
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
+        }
+
+        /* --- CONTENIDO PRINCIPAL --- */
+        main {
+            flex: 1;
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 2.8rem;
+            color: #39ff14;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+            margin-bottom: 30px;
+        }
+
+        /* --- TEXTO DE IMPORTANCIA --- */
+        .importance-container {
+            background-color: #000000;
+            border: 3px solid #ff007f;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 40px;
+            text-align: left;
+            box-shadow: 0 5px 15px rgba(255, 0, 127, 0.15);
+        }
+
+        .importance-container h2 {
+            font-size: 1.4rem;
+            color: #39ff14;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px rgba(57, 255, 20, 0.3);
+        }
+
+        .importance-container p {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            color: #e0e0e0;
+            margin-bottom: 10px;
+        }
+
+        /* --- ANÁLISIS ESCRITO DEL EQUIPO --- */
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+            text-align: left;
+        }
+
+        .analysis-card {
+            background-color: #0d0d13;
+            border-left: 4px solid #ff007f;
+            padding: 20px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .analysis-card h3 {
+            font-size: 1.2rem;
+            color: #ffffff;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .analysis-card ul {
+            list-style-type: square;
+            padding-left: 20px;
+            color: #bffffa;
+            line-height: 1.5;
+        }
+
+        /* --- CONTENEDOR GRANDE PARA LA FOTO (ORGANIGRAMA VIRTUAL) --- */
+        .chart-photo-container {
+            background-color: #000000;
+            border: 4px solid #39ff14;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(57, 255, 20, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .chart-photo-container h2 {
+            font-size: 1.5rem;
+            color: #ff007f;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px rgba(255, 0, 127, 0.3);
+        }
+
+        .image-wrapper {
+            width: 100%;
+            max-width: 900px;
+            background-color: #121218;
+            border: 2px dashed #39ff14;
+            border-radius: 8px;
+            padding: 10px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            height: auto;
+            max-height: 600px;
+            object-fit: contain;
+            border-radius: 4px;
+            display: block;
+        }
+
+        footer { 
+            background-color: #000000; 
+            text-align: center; 
+            padding: 15px; 
+            font-size: 0.9rem; 
+            color: #444444; 
+            border-top: 4px solid #ff007f; 
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MENÚ SUPERIOR -->
+    <header>
+        <nav>
+            <div class="logo-text">Crazy Pop</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Lobby</a></li>
+                <li><a href="1.html">Sección 1</a></li>
+                <li><a href="2.html">Sección 2</a></li>
+                <li><a href="3.html">Sección 3</a></li>
+                <li><a href="4.html" class="active">Sección 4</a></li>
+                <li><a href="5.html">Sección 5</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- CUERPO DE LA SECCIÓN -->
+    <main>
+        <h1 class="section-title">Estructura Organizacional</h1>
+
+        <!-- Bloque de Importancia -->
+        <div class="importance-container">
+            <h2>Importancia de nuestra estructura</h2>
+            <p>
+                Para un emprendimiento comercial dinámico como <strong>Crazy Pop</strong>, la estructura organizacional es el motor que asegura que cada paleta preparada y cada manzana con chamoy mantenga los más altos estándares de calidad y sabor de manera constante. 
+            </p>
+            <p>
+                Establecer roles claros permite delimitar las responsabilidades críticas: desde la meticulosa selección y preparación de la materia prima, pasando por el riguroso control higiénico, hasta la atención rápida al cliente y la administración estratégica de los recursos financieros. Esto garantiza un flujo operativo ágil y sin contratiempos durante las horas pico de venta en el plantel.
+            </p>
+        </div>
+
+        <!-- Desglose y Análisis del Organigrama -->
+        <div class="analysis-grid">
+            
+            <div class="analysis-card">
+                <h3> Dirección y Control</h3>
+                <ul>
+                    <li><strong>Lorenzo Marroquin:</strong> Gerente General (Líder del proyecto).</li>
+                    <li><strong>Arely Vianney:</strong> Control de Calidad (Monitoreo de estándares).</li>
+                </ul>
+            </div>
+
+            <div class="analysis-card">
+                <h3>⚙️ Producción y Soporte</h3>
+                <ul>
+                    <li><strong>Guillermo Martinez:</strong> Producción Coordinacion.</li>
+                    <li><strong>Chistopher Reyes:</strong> Produccion Soporte.</li>
+                    <li><strong>Jhossan Medina:</strong> Produccion Soporte.</li>
+                </ul>
+            </div>
+
+            <div class="analysis-card">
+                <h3> Ventas y Logística</h3>
+                <ul>
+                    <li><strong>Jacqueline Mtz:</strong> Coordinacion Ventas.</li>
+                    <li><strong>Emily Montoya:</strong> Ventas y Atencion al Cliente.</li>
+                </ul>
+            </div>
+
+            <div class="analysis-card">
+                <h3> Estrategia y Finanzas</h3>
+                <ul>
+                    <li><strong>Dayanara Maury:</strong> Markething y Redes Sociales.</li>
+                    <li><strong>Jennifer Osorio:</strong> Redes Sociales.</li>
+                    <li><strong>Karina Morales:</strong> Administreacion e Inventarios.</li>
+                    <li><strong>Mauro Palacios:</strong> Finanzas.</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- ESPACIO RESERVADO PARA LA FOTO DEL ORGANIGRAMA -->
+        <div class="chart-photo-container">
+            <h2>Mapa de Roles de Crazy Pop</h2>
+            <div class="image-wrapper">
+                <!-- Se manda a llamar de forma exacta el archivo solicitado -->
+                <img src="image_3390df.png" alt="Estructura Organizacional Gráfica de Crazy Pop">
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Crazy Pop Arcade - Todos los derechos reservados.</p>
+    </footer>
+
+</body>
+</html>
