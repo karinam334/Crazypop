@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crazy Pop - Arcade Game</title>
+    <title>Crazy Pop - Nuestro Menú</title>
     <style>
         /* --- ESTILOS GLOBALES --- */
         * {
@@ -17,8 +17,8 @@
             background-color: #050508; 
             background-image: 
                 linear-gradient(rgba(5, 5, 8, 0.9) 0%, rgba(5, 5, 8, 0.9) 100%),
-                linear-gradient(90deg, rgba(57, 255, 20, 0.05) 1px, transparent 1px),
-                linear-gradient(rgba(57, 255, 20, 0.05) 1px, transparent 1px);
+                linear-gradient(90deg, rgba(255, 0, 127, 0.05) 1px, transparent 1px),
+                linear-gradient(rgba(255, 0, 127, 0.05) 1px, transparent 1px);
             background-size: 100% 100%, 40px 40px, 40px 40px;
             color: #ffffff;
             min-height: 100vh;
@@ -79,143 +79,201 @@
             box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
         }
 
-        /* --- RETRO CABINET --- */
+        /* --- CONTENIDO PRINCIPAL --- */
         main {
             flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .arcade-container {
-            background-color: #000000;
-            border: 4px dashed #39ff14;
-            outline: 4px solid #ff007f;
-            padding: 20px;
-            border-radius: 4px;
-            box-shadow: 0 0 45px rgba(255, 0, 127, 0.35);
-            text-align: center;
-            max-width: 710px;
+            max-width: 1100px;
             width: 100%;
-            position: relative;
-        }
-
-        .score-board {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            color: #39ff14;
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-shadow: 0 0 5px #39ff14;
-            text-transform: uppercase;
-        }
-
-        .canvas-wrapper {
-            position: relative;
             margin: 0 auto;
-            width: 660px;
-            height: 660px;
+            padding: 40px 20px;
+            text-align: center;
         }
 
-        canvas {
+        .menu-title {
+            font-size: 2.8rem;
+            color: #39ff14;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .menu-subtitle {
+            font-size: 1.1rem;
+            color: #ff007f;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 50px;
+            font-weight: bold;
+        }
+
+        /* --- CONTENEDOR EXCLUSIVO PARA DOS PRODUCTOS --- */
+        .products-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            justify-content: center;
+            align-items: stretch;
+        }
+
+        /* --- TARJETAS PREMIUM DE PRODUCTO --- */
+        .product-card {
             background-color: #000000;
             border: 4px solid #ff007f;
-            display: block;
-            box-shadow: 0 0 20px rgba(255, 0, 127, 0.2);
+            border-radius: 16px;
+            padding: 30px;
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 25px rgba(255, 0, 127, 0.15);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: left;
         }
 
-        /* --- INTERFACES OVERLAYS --- */
-        .game-overlay {
-            display: none; 
-            position: absolute;
-            top: 4px; left: 4px; right: 4px; bottom: 4px;
-            background-color: rgba(0, 0, 0, 0.95);
-            flex-direction: column;
+        .product-card:hover {
+            transform: translateY(-10px);
+            border-color: #39ff14;
+            box-shadow: 0 15px 30px rgba(57, 255, 20, 0.25);
+        }
+
+        /* Contenedor de la Imagen */
+        .image-box {
+            width: 100%;
+            height: 280px;
+            background-color: #121218;
+            border: 2px dashed #ff007f;
+            border-radius: 12px;
+            display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 10;
-            animation: fadeIn 0.4s ease forwards;
-        }
-
-        .game-overlay img {
-            max-width: 200px;
-            height: auto;
-            margin-bottom: 20px;
-            animation: bounce 2s infinite ease-in-out;
-        }
-
-        .game-overlay h2 {
-            font-size: 2.5rem;
-            letter-spacing: 2px;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-        }
-
-        .text-win {
-            color: #39ff14;
-            text-shadow: 0 0 15px #39ff14;
-        }
-
-        .text-lose {
-            color: #ff007f;
-            text-shadow: 0 0 15px #ff007f;
-        }
-
-        .game-overlay p {
-            color: #ffffff;
-            font-size: 1.1rem;
-            letter-spacing: 1px;
             margin-bottom: 25px;
+            overflow: hidden;
+            transition: border-color 0.3s ease;
         }
 
-        .btn-retry {
-            padding: 12px 30px;
-            background-color: transparent;
-            color: #39ff14;
-            border: 3px solid #39ff14;
-            font-weight: bold;
-            font-size: 1.2rem;
-            cursor: pointer;
+        .product-card:hover .image-box {
+            border-color: #39ff14;
+        }
+
+        .image-box img {
+            max-width: 95%;
+            max-height: 95%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        /* Encabezado y precios */
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .product-name {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #ffffff;
             text-transform: uppercase;
-            box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
-            transition: all 0.2s ease;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
         }
 
-        .btn-retry:hover {
+        .product-price {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #39ff14;
+            background-color: rgba(57, 255, 20, 0.1);
+            padding: 6px 12px;
+            border: 2px solid #39ff14;
+            border-radius: 6px;
+            white-space: nowrap;
+            text-shadow: 0 0 5px rgba(57, 255, 20, 0.3);
+        }
+
+        .product-card:hover .product-price {
             background-color: #39ff14;
             color: #000000;
-            box-shadow: 0 0 20px #39ff14;
-            transform: scale(1.05);
+            box-shadow: 0 0 10px #39ff14;
+            text-shadow: none;
         }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        /* Características (Texto Tal cual) */
+        .features-title {
+            font-size: 1.1rem;
+            color: #ff007f;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
 
-        .controls-info {
-            margin-top: 15px;
-            color: #888888;
-            font-size: 0.85rem;
+        .features-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-grow: 1;
+        }
+
+        .features-list li {
+            font-size: 1rem;
+            color: #e0e0e0;
+            line-height: 1.4;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        /* Viñeta Retro personalizada */
+        .features-list li::before {
+            content: "■";
+            position: absolute;
+            left: 0;
+            color: #ff007f;
+            font-size: 0.8rem;
+            top: 2px;
+            transition: color 0.3s ease;
+        }
+
+        .product-card:hover .features-list li::before {
+            color: #39ff14;
+        }
+
+        /* Créditos de Alumnos (Basado en las imágenes) */
+        .credits-tag {
+            margin-top: 25px;
+            font-size: 0.8rem;
+            color: #666666;
             text-transform: uppercase;
             letter-spacing: 1px;
+            border-top: 1px dashed #222222;
+            padding-top: 10px;
+            text-align: right;
         }
 
-        .controls-info span { color: #ff007f; }
-        .controls-info em { color: #39ff14; font-style: normal;}
-        footer { background-color: #000000; text-align: center; padding: 15px; font-size: 0.9rem; color: #444444; border-top: 4px solid #ff007f; }
+        footer { 
+            background-color: #000000; 
+            text-align: center; 
+            padding: 15px; 
+            font-size: 0.9rem; 
+            color: #444444; 
+            border-top: 4px solid #ff007f; 
+            margin-top: 50px;
+        }
     </style>
 </head>
 <body>
 
+    <!-- MENÚ SUPERIOR -->
     <header>
         <nav>
             <div class="logo-text">Crazy Pop</div>
             <ul class="nav-links">
                 <li><a href="index.html">Lobby</a></li>
-                <li><a href="1.html">Sección 1</a></li>
-                <li><a href="2.html" class="active">Sección 2</a></li>
+                <li><a href="1.html" class="active">Sección 1</a></li>
+                <li><a href="2.html">Sección 2</a></li>
                 <li><a href="3.html">Sección 3</a></li>
                 <li><a href="4.html">Sección 4</a></li>
                 <li><a href="5.html">Sección 5</a></li>
@@ -223,33 +281,50 @@
         </nav>
     </header>
 
+    <!-- CUERPO DEL MENÚ -->
     <main>
-        <div class="arcade-container">
-            <div class="score-board">
-                <span>SCORE: <span id="score">0000</span></span>
-                <span>LIVES: <span id="livesContainer">💖💖💖</span></span>
-            </div>
-            
-            <div class="canvas-wrapper">
-                <canvas id="gameCanvas" width="660" height="660"></canvas>
-                
-                <div class="game-overlay" id="victoryScreen">
-                    <img src="panso.png" alt="Rana Pansa">
-                    <h2 class="text-win">¡FELICIDADES GANASTE!</h2>
-                    <p>Te comiste todas las paletas de Crazy Pop</p>
-                    <button class="btn-retry" onclick="resetGame()">Jugar de nuevo</button>
-                </div>
+        <h1 class="menu-title">Nuestras Especialidades</h1>
+        <p class="menu-subtitle">¡Los antojos oficiales que le dan vida al juego!</p>
 
-                <div class="game-overlay" id="gameOverScreen">
-                    <h2 class="text-lose">GAME OVER</h2>
-                    <p>La ranita se quedó sin energías...</p>
-                    <button class="btn-retry" onclick="resetGame()">Reintentar</button>
-                </div>
-            </div>
+        <div class="products-container">
             
-            <div class="controls-info">
-                ¡Combina los Buffs! <span>VELOCIDAD (P1)</span> + <em>FUERZA (P2)</em> = <span>D</span><em>O</em><span>B</span><em>L</em><span>E</span> Brillo Acumulado
+            <!-- PRODUCTO 1: PALETAS PREPARADAS -->
+            <div class="product-card">
+                <div class="image-box">
+                    <img src="image_3de722.png" alt="Paletas Preparadas">
+                </div>
+                <div class="product-header">
+                    <h2 class="product-name">Paletas preparadas</h2>
+                    <span class="product-price">$35.00 MXN</span>
+                </div>
+                <h3 class="features-title">Características:</h3>
+                <ul class="features-list">
+                    <li>Paleta base artesanal</li>
+                    <li>100% Personalizado por los alumnos</li>
+                    <li>Incluye chamoy de la casa miguelito, polvos acidos y gomitas frescas</li>
+                </ul>
+                <div class="credits-tag">Por: Jhossan Medina</div>
             </div>
+
+            <!-- PRODUCTO 2: MANZANAS CON CHAMOY -->
+            <div class="product-card">
+                <div class="image-box">
+                    <img src="image_340998.png" alt="Manzanas con Chamoy">
+                </div>
+                <div class="product-header">
+                    <h2 class="product-name">Manzanas con chamoy</h2>
+                    <span class="product-price">$85.00 MXN</span>
+                </div>
+                <h3 class="features-title">Características:</h3>
+                <ul class="features-list">
+                    <li>Manzana fresca seleccionada.</li>
+                    <li>Cobertura artesanal gruesa de pasta de chamoy y chile.</li>
+                    <li>Decoración premium con gomitas.</li>
+                    <li>Sacia el hambre y el antojo al mismo tiempo.</li>
+                </ul>
+                <div class="credits-tag">Por: Christopher Reyes</div>
+            </div>
+
         </div>
     </main>
 
@@ -257,428 +332,5 @@
         <p>&copy; 2026 Crazy Pop Arcade - Todos los derechos reservados.</p>
     </footer>
 
-    <script>
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
-        const scoreElement = document.getElementById("score");
-        const livesContainer = document.getElementById("livesContainer");
-        const victoryScreen = document.getElementById("victoryScreen");
-        const gameOverScreen = document.getElementById("gameOverScreen");
-
-        const tileSize = 30; 
-        let score = 0;
-        let lives = 3;
-        let totalItems = 0; 
-        let isGameOver = false;
-        let globalPulseTimer = 0; // Para el efecto alternante de luces neón
-
-        // --- CARGA DE IMÁGENES ---
-        const imgOpen = new Image(); imgOpen.src = 'open.png';
-        const imgClose = new Image(); imgClose.src = 'close.png';
-        const imgPale = new Image(); imgPale.src = 'pale.png';
-        const imgPale2 = new Image(); imgPale2.src = 'pale2.png';
-
-        // Estructura de la Ranita
-        const pacman = {
-            x: 30, y: 30, 
-            baseSpeed: 3,
-            currentSpeed: 3,
-            dx: 0, dy: 0,
-            requestedDx: 0, requestedDy: 0,
-            animationTimer: 0, useOpenSprite: true,
-            direction: 'right',
-            
-            // Buffs Independientes y Acumulables
-            superMode: false,
-            superTimer: 0,
-            speedMode: false,
-            speedTimer: 0
-        };
-
-        // Escuadrón de fantasmas con IA mejorada anti-atascamiento
-        const ghosts = [
-            { x: 300, y: 300, startX: 300, startY: 300, dx: 3, dy: 0, speed: 3, isDead: false, respawnTimer: 0, lastGridX: 0, lastGridY: 0, stuckCounter: 0 },
-            { x: 330, y: 300, startX: 330, startY: 300, dx: -3, dy: 0, speed: 3, isDead: false, respawnTimer: 0, lastGridX: 0, lastGridY: 0, stuckCounter: 0 },
-            { x: 300, y: 330, startX: 300, startY: 330, dx: 0, dy: -3, speed: 3, isDead: false, respawnTimer: 0, lastGridX: 0, lastGridY: 0, stuckCounter: 0 },
-            { x: 330, y: 330, startX: 330, startY: 330, dx: 0, dy: 3, speed: 3, isDead: false, respawnTimer: 0, lastGridX: 0, lastGridY: 0, stuckCounter: 0 },
-            { x: 600, y: 600, startX: 600, startY: 600, dx: -3, dy: 0, speed: 3, isDead: false, respawnTimer: 0, lastGridX: 0, lastGridY: 0, stuckCounter: 0 }
-        ];
-
-        // MAPA GIGANTE OSCURO (22x22)
-        const baseMap = [
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-            [1,2,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1],
-            [1,0,1,1,0,1,1,1,1,0,1,1,0,1,1,1,1,0,1,1,0,1],
-            [1,0,1,1,0,1,1,1,1,0,0,0,0,1,1,1,1,0,1,1,0,1],
-            [1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1],
-            [1,0,1,1,0,1,0,1,1,1,1,1,1,1,1,0,1,0,1,1,0,1],
-            [1,0,0,0,0,1,0,0,0,0,1,1,0,0,0,0,1,0,0,0,0,1],
-            [1,1,1,1,0,1,1,1,1,2,1,1,2,1,1,1,1,0,1,1,1,1],
-            [1,2,2,1,0,1,2,2,2,2,2,2,2,2,2,2,1,0,1,2,2,1],
-            [1,1,1,1,0,1,2,1,1,1,2,2,1,1,1,2,1,0,1,1,1,1],
-            [1,2,2,2,0,2,2,1,2,2,2,2,2,2,1,2,2,0,2,2,2,1],
-            [1,2,2,2,0,2,2,1,2,2,2,2,2,2,1,2,2,0,2,2,2,1],
-            [1,1,1,1,0,1,2,1,1,1,1,1,1,1,1,2,1,0,1,1,1,1],
-            [1,2,2,1,0,1,2,2,2,2,2,2,2,2,2,2,1,0,1,2,2,1],
-            [1,1,1,1,0,1,2,1,1,1,1,1,1,1,1,2,1,0,1,1,1,1],
-            [1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1],
-            [1,0,1,1,0,1,1,1,1,0,1,1,0,1,1,1,1,0,1,1,0,1],
-            [1,0,0,1,0,0,0,0,0,0,2,2,0,0,0,0,0,0,1,0,0,1],
-            [1,1,0,1,0,1,0,1,1,1,1,1,1,1,1,0,1,0,1,0,1,1],
-            [1,0,0,0,0,1,0,0,0,0,1,1,0,0,0,0,1,0,0,0,0,1],
-            [1,0,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1,1,1,1,0,1],
-            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-        ];
-
-        let map = [];
-        let itemTypeMap = [];
-
-        function initGameData() {
-            score = 0;
-            lives = 3;
-            totalItems = 0;
-            isGameOver = false;
-            scoreElement.innerText = "0000";
-            livesContainer.innerText = "💖💖💖";
-            victoryScreen.style.display = 'none';
-            gameOverScreen.style.display = 'none';
-
-            pacman.x = 30; pacman.y = 30;
-            pacman.dx = 0; pacman.dy = 0;
-            pacman.requestedDx = 0; pacman.requestedDy = 0;
-            pacman.currentSpeed = pacman.baseSpeed;
-            pacman.superMode = false; pacman.superTimer = 0;
-            pacman.speedMode = false; pacman.speedTimer = 0;
-
-            map = JSON.parse(JSON.stringify(baseMap));
-            itemTypeMap = [];
-
-            for (let r = 0; r < map.length; r++) {
-                itemTypeMap[r] = [];
-                for (let c = 0; c < map[r].length; c++) {
-                    if (map[r][c] === 0) {
-                        totalItems++; 
-                        let rand = Math.random();
-                        if (rand < 0.08) { 
-                            itemTypeMap[r][c] = 'p1'; 
-                        } else if (rand < 0.14) { 
-                            itemTypeMap[r][c] = 'p2'; 
-                        } else {
-                            itemTypeMap[r][c] = 'c';  
-                        }
-                    }
-                }
-            }
-
-            ghosts.forEach(g => {
-                g.x = g.startX; g.y = g.startY;
-                g.isDead = false; g.respawnTimer = 0;
-                g.stuckCounter = 0;
-                // Forzar salida inicial mandándolos en direcciones de dispersión
-                g.dx = Math.random() > 0.5 ? 3 : -3;
-                g.dy = Math.random() > 0.5 ? 3 : -3;
-            });
-        }
-
-        function drawMap() {
-            for (let r = 0; r < map.length; r++) {
-                for (let c = 0; c < map[r].length; c++) {
-                    if (map[r][c] === 1) {
-                        ctx.fillStyle = "#121218"; 
-                        ctx.fillRect(c * tileSize, r * tileSize, tileSize, tileSize);
-                        ctx.strokeStyle = "#050508";
-                        ctx.strokeRect(c * tileSize, r * tileSize, tileSize, tileSize);
-                    } else if (map[r][c] === 0) {
-                        let type = itemTypeMap[r][c];
-                        if (type === 'p1' && imgPale.complete && imgPale.width > 0) {
-                            ctx.drawImage(imgPale, c * tileSize + 4, r * tileSize + 4, tileSize - 8, tileSize - 8);
-                        } else if (type === 'p2' && imgPale2.complete && imgPale2.width > 0) {
-                            ctx.drawImage(imgPale2, c * tileSize + 4, r * tileSize + 4, tileSize - 8, tileSize - 8);
-                        } else {
-                            ctx.beginPath();
-                            ctx.arc(c * tileSize + tileSize/2, r * tileSize + tileSize/2, 4, 0, Math.PI * 2);
-                            ctx.fillStyle = "#ff007f";
-                            ctx.fill();
-                            ctx.closePath();
-                        }
-                    }
-                }
-            }
-        }
-
-        function drawPacman() {
-            ctx.save();
-            ctx.translate(pacman.x + tileSize/2, pacman.y + tileSize/2);
-            
-            if (pacman.direction === 'left') ctx.rotate(Math.PI);
-            if (pacman.direction === 'up') ctx.rotate(-Math.PI / 2);
-            if (pacman.direction === 'down') ctx.rotate(Math.PI / 2);
-
-            // CÁLCULO DE BRILLOS ACUMULADOS / STACKING VISUAL
-            if (pacman.superMode && pacman.speedMode) {
-                // Brillo combinado mágico: cambia cada 8 cuadros entre verde y rosa
-                ctx.shadowBlur = 22;
-                ctx.shadowColor = (Math.floor(globalPulseTimer / 8) % 2 === 0) ? "#39ff14" : "#ff007f";
-            } else if (pacman.superMode) {
-                ctx.shadowBlur = 18;
-                ctx.shadowColor = "#39ff14"; // Solo fuerza (Verde)
-            } else if (pacman.speedMode) {
-                ctx.shadowBlur = 18;
-                ctx.shadowColor = "#ff007f"; // Solo velocidad (Rosa)
-            }
-
-            let currentImg = pacman.useOpenSprite ? imgOpen : imgClose;
-
-            if (currentImg.complete && currentImg.width > 0) {
-                ctx.drawImage(currentImg, -tileSize/2, -tileSize/2, tileSize, tileSize);
-            } else {
-                ctx.beginPath();
-                ctx.arc(0, 0, tileSize/2.5, 0.2 * Math.PI, 1.8 * Math.PI);
-                ctx.lineTo(0, 0);
-                ctx.fillStyle = pacman.superMode ? "#39ff14" : (pacman.speedMode ? "#ff007f" : "#f3f311");
-                ctx.fill();
-                ctx.closePath();
-            }
-            ctx.restore();
-            ctx.shadowBlur = 0; 
-        }
-
-        function drawGhosts() {
-            ghosts.forEach(g => {
-                if (g.isDead) return;
-
-                ctx.beginPath();
-                ctx.arc(g.x + tileSize/2, g.y + tileSize/2, tileSize/2.5, Math.PI, 0, false);
-                ctx.lineTo(g.x + tileSize/2 + tileSize/2.5, g.y + tileSize/2 + tileSize/2.5);
-                ctx.lineTo(g.x + tileSize/2 - tileSize/2.5, g.y + tileSize/2 + tileSize/2.5);
-                
-                // Si la rana puede morderlos, se vuelven morados/azules asustados
-                ctx.fillStyle = pacman.superMode ? "#4d00ff" : "#39ff14"; 
-                ctx.fill();
-                ctx.shadowBlur = 8;
-                ctx.shadowColor = ctx.fillStyle;
-                ctx.closePath();
-                ctx.shadowBlur = 0;
-            });
-        }
-
-        function isColliding(x, y) {
-            if (x % tileSize === 0 && y % tileSize === 0) {
-                const col = x / tileSize;
-                const row = y / tileSize;
-                if (row < 0 || row >= map.length || col < 0 || col >= map[0].length) return true;
-                return map[row][col] === 1;
-            }
-            return false;
-        }
-
-        function update() {
-            if (isGameOver) return;
-
-            globalPulseTimer++;
-
-            // Cuenta regresiva del modo velocidad
-            if (pacman.speedMode) {
-                pacman.speedTimer--;
-                if (pacman.speedTimer <= 0) {
-                    pacman.speedMode = false;
-                    // Solo bajar la velocidad si NO tiene puesto el buff en combo que requiera alteración
-                    if (!pacman.superMode) pacman.currentSpeed = pacman.baseSpeed;
-                }
-            }
-
-            // Cuenta regresiva del modo súper fuerza
-            if (pacman.superMode) {
-                pacman.superTimer--;
-                if (pacman.superTimer <= 0) {
-                    pacman.superMode = false;
-                }
-            }
-
-            // Fijar velocidad real según buffs acumulados
-            if (pacman.speedMode) {
-                pacman.currentSpeed = 5; 
-            } else {
-                pacman.currentSpeed = pacman.baseSpeed; 
-            }
-
-            // Control e intersecciones de la ranita
-            if (pacman.x % tileSize === 0 && pacman.y % tileSize === 0) {
-                if (!isColliding(pacman.x + pacman.requestedDx * tileSize, pacman.y + pacman.requestedDy * tileSize)) {
-                    pacman.dx = pacman.requestedDx;
-                    pacman.dy = pacman.requestedDy;
-                    if(pacman.dx > 0) pacman.direction = 'right';
-                    if(pacman.dx < 0) pacman.direction = 'left';
-                    if(pacman.dy > 0) pacman.direction = 'down';
-                    if(pacman.dy < 0) pacman.direction = 'up';
-                }
-                if (isColliding(pacman.x + pacman.dx * tileSize, pacman.y + pacman.dy * tileSize)) {
-                    pacman.dx = 0; pacman.dy = 0;
-                }
-            }
-
-            pacman.x += pacman.dx * pacman.currentSpeed;
-            pacman.y += pacman.dy * pacman.currentSpeed;
-
-            if (pacman.dx !== 0 || pacman.dy !== 0) {
-                pacman.animationTimer += pacman.speedMode ? 2 : 1;
-                if (pacman.animationTimer > 8) {
-                    pacman.useOpenSprite = !pacman.useOpenSprite;
-                    pacman.animationTimer = 0;
-                }
-            }
-
-            // Registro de colisión con los coleccionables
-if (pacman.x % tileSize === 0 && pacman.y % tileSize === 0) {
-    const col = pacman.x / tileSize;
-    const row = pacman.y / tileSize;
-    if (map[row] && map[row][col] === 0) {
-        let consumedType = itemTypeMap[row][col];
-        map[row][col] = 2; 
-        score += 10;
-        totalItems--;
-        scoreElement.innerText = score.toString().padStart(4, '0');
-
-        // MECÁNICA PALETA 1: Si ya estaba activa, restablece el tiempo a 6 segundos (No se acumula de forma infinita)
-        if (consumedType === 'p1') {
-            pacman.speedMode = true;
-            pacman.speedTimer = 360; 
-        }
-        
-        // MECÁNICA PALETA 2: Si ya tenías el poder, se restablece a 8 segundos máximos (Evita romper el juego)
-        if (consumedType === 'p2') {
-            pacman.superMode = true;
-            pacman.superTimer = 480; 
-        }
-
-        if (totalItems <= 0) {
-            isGameOver = true;
-            victoryScreen.style.display = 'flex';
-        }
-    }
-}
-
-            // SISTEMA INTELIGENTE DE FANTASMAS (INTELLIGENT ANTI-STUCK IA)
-            ghosts.forEach(g => {
-                if (g.isDead) {
-                    g.respawnTimer--;
-                    if (g.respawnTimer <= 0) {
-                        g.isDead = false;
-                        g.x = g.startX; g.y = g.startY; 
-                        g.stuckCounter = 0;
-                        // Expulsión forzada hacia arriba para sacarlos del centro rápido
-                        g.dx = 0; g.dy = -3;
-                    }
-                    return; 
-                }
-
-                // Detector de estancamiento
-                let currentGridX = Math.floor(g.x / tileSize);
-                let currentGridY = Math.floor(g.y / tileSize);
-
-                if (g.x % tileSize === 0 && g.y % tileSize === 0) {
-                    // Si sigue en el mismo bloque exacto del centro, eleva su molestia
-                    if (currentGridX === g.lastGridX && currentGridY === g.lastGridY && (currentGridX >= 9 && currentGridX <= 13 && currentGridY >= 8 && currentGridY <= 13)) {
-                        g.stuckCounter++;
-                    } else {
-                        g.stuckCounter = 0;
-                    }
-
-                    g.lastGridX = currentGridX;
-                    g.lastGridY = currentGridY;
-
-                    // Si el fantasma se queda atrapado en el centro, lo obligamos a tomar una ruta externa lejana
-                    let forceScattering = (g.stuckCounter > 15);
-
-                    if (isColliding(g.x + g.dx * tileSize, g.y + g.dy * tileSize) || Math.random() < 0.12 || forceScattering) {
-                        const dirs = [
-                            {dx: 1, dy: 0}, {dx: -1, dy: 0}, {dx: 0, dy: 1}, {dx: 0, dy: -1}
-                        ];
-                        
-                        // Filtrar giros válidos para que no caminen contra la pared
-                        let validDirs = dirs.filter(d => !isColliding(g.x + d.dx * tileSize, g.y + d.dy * tileSize));
-                        
-                        // Evitar que regresen de inmediato por donde venían a menos que sea un callejón sin salida
-                        if (validDirs.length > 1 && !forceScattering) {
-                            validDirs = validDirs.filter(d => d.dx !== -g.dx || d.dy !== -g.dy);
-                        }
-
-                        if (validDirs.length > 0) {
-                            let choice = validDirs[Math.floor(Math.random() * validDirs.length)];
-                            
-                            // Si estaba atascado en el centro, lo forzamos a huir verticalmente hacia los pasillos exteriores
-                            if (forceScattering) {
-                                let escapeRoute = validDirs.find(d => d.dy === -1 || d.dy === 1);
-                                if (escapeRoute) choice = escapeRoute;
-                                g.stuckCounter = 0;
-                            }
-                            
-                            g.dx = choice.dx; 
-                            g.dy = choice.dy;
-                        }
-                    }
-                }
-
-                g.x += g.dx * g.speed;
-                g.y += g.dy * g.speed;
-
-                // Colisiones físicas
-                const dist = Math.hypot((pacman.x + tileSize/2) - (g.x + tileSize/2), (pacman.y + tileSize/2) - (g.y + tileSize/2));
-                if (dist < tileSize * 0.65) {
-                    if (pacman.superMode) {
-                        g.isDead = true;
-                        g.respawnTimer = 180; // Tiempo en la congeladora del centro
-                        score += 100;
-                        scoreElement.innerText = score.toString().padStart(4, '0');
-                    } else {
-                        lives--;
-                        livesContainer.innerText = "💖".repeat(lives);
-                        if (lives <= 0) {
-                            isGameOver = true;
-                            gameOverScreen.style.display = 'flex';
-                        } else {
-                            // Reset parcial al perder una vida
-                            pacman.x = 30; pacman.y = 30;
-                            pacman.dx = 0; pacman.dy = 0;
-                            pacman.requestedDx = 0; pacman.requestedDy = 0;
-                            pacman.currentSpeed = pacman.baseSpeed;
-                            pacman.speedMode = false;
-                            pacman.superMode = false;
-                        }
-                    }
-                }
-            });
-        }
-
-        function gameLoop() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawMap();
-            drawPacman();
-            drawGhosts();
-            update();
-            requestAnimationFrame(gameLoop);
-        }
-
-        function resetGame() {
-            initGameData();
-        }
-
-        window.addEventListener("keydown", (e) => {
-            if(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
-                e.preventDefault(); 
-            }
-            if (isGameOver) return;
-
-            switch(e.key) {
-                case "ArrowUp":    pacman.requestedDx = 0;  pacman.requestedDy = -1; break;
-                case "ArrowDown":  pacman.requestedDx = 0;  pacman.requestedDy = 1;  break;
-                case "ArrowLeft":  pacman.requestedDx = -1; pacman.requestedDy = 0;  break;
-                case "ArrowRight": pacman.requestedDx = 1;  pacman.requestedDy = 0;  break;
-            }
-        });
-
-        initGameData();
-        gameLoop();
-    </script>
 </body>
 </html>
