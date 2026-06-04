@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crazy Pop - Quiénes Somos</title>
+    <style>
+        /* --- ESTILOS GLOBALES --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', Courier, monospace, sans-serif;
+        }
+
+        body {
+            background-color: #050508; 
+            background-image: 
+                linear-gradient(rgba(5, 5, 8, 0.9) 0%, rgba(5, 5, 8, 0.9) 100%),
+                linear-gradient(90deg, rgba(57, 255, 20, 0.05) 1px, transparent 1px),
+                linear-gradient(rgba(57, 255, 20, 0.05) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* --- MENÚ DE NAVEGACIÓN SUPERIOR --- */
+        header {
+            background-color: #000000;
+            padding: 15px 20px;
+            border-bottom: 4px solid #39ff14;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(57, 255, 20, 0.25);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo-text {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #ff007f;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 8px #ff007f;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #39ff14;
+            font-weight: bold;
+            padding: 8px 16px;
+            border: 2px solid transparent;
+            transition: all 0.2s ease-in-out;
+            text-transform: uppercase;
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            border-color: #39ff14;
+            background-color: rgba(57, 255, 20, 0.1);
+            color: #39ff14;
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
+        }
+
+        /* --- CONTENIDO PRINCIPAL --- */
+        main {
+            flex: 1;
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 2.8rem;
+            color: #39ff14;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+            margin-bottom: 30px;
+        }
+
+        /* --- BLOQUE DE BIENVENIDA / DESCRIPCIÓN --- */
+        .welcome-container {
+            background-color: #000000;
+            border: 3px solid #ff007f;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 5px 15px rgba(255, 0, 127, 0.2);
+            position: relative;
+        }
+
+        .welcome-text {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #ffffff;
+            text-align: justify;
+        }
+
+        .welcome-text span {
+            color: #ff007f;
+            font-weight: bold;
+        }
+
+        /* --- SECCIÓN INTEGRAL DE MISIÓN Y VISIÓN --- */
+        .mv-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .mv-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        /* Bloques inspirados en los recuadros redondeados de la imagen */
+        .mv-box {
+            background-color: #000000;
+            border: 4px dashed #ff007f;
+            border-radius: 24px; /* Esquinas redondeadas pronunciadas como en image_33e739.png */
+            padding: 35px 25px;
+            flex: 1;
+            min-width: 290px;
+            max-width: 450px;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.05);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .mv-box:hover {
+            border-color: #39ff14;
+            border-style: solid;
+            box-shadow: 0 0 25px rgba(57, 255, 20, 0.2);
+            transform: scale(1.02);
+        }
+
+        .mv-box h2 {
+            font-size: 1.8rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .title-mision {
+            color: #ff007f;
+            text-shadow: 0 0 5px rgba(255, 0, 127, 0.3);
+        }
+
+        .title-vision {
+            color: #39ff14;
+            text-shadow: 0 0 5px rgba(57, 255, 20, 0.3);
+        }
+
+        .mv-box p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #e0e0e0;
+            text-transform: none; /* Mantiene la legibilidad original */
+        }
+
+        /* --- DISEÑO DE IMAGEN INTEGRADA DE LA REPOSTERA --- */
+        .illustration-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .illustration-container img {
+            max-width: 100%;
+            height: auto;
+            border: 2px solid #222;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .credits-author {
+            font-size: 0.85rem;
+            color: #555555;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 15px;
+        }
+
+        footer { 
+            background-color: #000000; 
+            text-align: center; 
+            padding: 15px; 
+            font-size: 0.9rem; 
+            color: #444444; 
+            border-top: 4px solid #ff007f; 
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MENÚ SUPERIOR -->
+    <header>
+        <nav>
+            <div class="logo-text">Crazy Pop</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Lobby</a></li>
+                <li><a href="1.html">Sección 1</a></li>
+                <li><a href="2.html">Sección 2</a></li>
+                <li><a href="3.html" class="active">Sección 3</a></li>
+                <li><a href="4.html">Sección 4</a></li>
+                <li><a href="5.html">Sección 5</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- CUERPO DE LA SECCIÓN -->
+    <main>
+        <h1 class="section-title">Nuestra Empresa</h1>
+
+        <!-- Mensaje de Introducción -->
+        <div class="welcome-container">
+            <p class="welcome-text">
+                ¡Hola, bienvenidos! Nosotros somos <span>Crazy Pop</span>, un emprendimiento de giro comercial donde transformamos las paletas de hielo y las manzanas en una bomba de sabor preparada con chamoy, chile en polvo y gomitas.
+            </p>
+        </div>
+
+        <div class="mv-wrapper">
+            <!-- Bloques de Misión y Visión (Texto tal cual extraído de image_33e739.png) -->
+            <div class="mv-container">
+                
+                <!-- MISIÓN -->
+                <div class="mv-box">
+                    <h2 class="title-mision">Misión</h2>
+                    <p>Ofrecer paletas locas e innovadoras de alta calidad con combinaciones unicas y atención eficiente</p>
+                </div>
+
+                <!-- VISIÓN -->
+                <div class="mv-box">
+                    <h2 class="title-vision">Visión</h2>
+                    <p>Consolidarnos este semestre como el el stand mas popular y rentable del plantel, y planear la expansión con carritos propios.</p>
+                </div>
+
+            </div>
+
+            <!-- Contenedor para desplegar la imagen original completa como recurso visual de soporte -->
+            <div class="illustration-container">
+                <img src="image_33e739.png" alt="Misión y Visión Original Canvas">
+            </div>
+            <div class="credits-author">Diseño por: Karina Morales</div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Crazy Pop Arcade - Todos los derechos reservados.</p>
+    </footer>
+
+</body>
+</html>
